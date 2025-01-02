@@ -1,0 +1,15 @@
+# Create a new user
+POST http://localhost:5003/users
+Content-Type: application/json
+
+{
+  "fullname": "RZCoding",
+  "avatar": "avatar.jpg",
+  "username": "user123",
+  "password": "securepassword",
+  "role": "admin",
+  "rpc": "some rpc",
+  "kebun": "kebun name",
+  "afdeling": "afdeling name",
+  "account_type": "standard"
+}
