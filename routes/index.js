@@ -16,7 +16,8 @@ import {
   getVegetatifById,
   createVegetatif,
   updateVegetatif,
-  deleteVegetatif
+  deleteVegetatif,
+  getDistinctTahunBulanVegetatif
 } from '../controllers/Vegetatif.js';
 
 const $routes = express.Router();
@@ -69,7 +70,7 @@ $routes.get('/vegetatif/:id', getVegetatifById);
 $routes.post('/vegetatif', createVegetatif);
 $routes.put('/vegetatif/:id', updateVegetatif);
 $routes.delete('/vegetatif/:id', deleteVegetatif);
-
+$routes.get('/vegetatif/distinct-tahun-bulan', getDistinctTahunBulanVegetatif);
 
 $routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";

@@ -54,3 +54,39 @@ export const deleteVegetatif = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+// Get all Vegetatif records by TBM 1
+export const getVegetatifByTBM1 = async (req, res) => {
+    const tahun = req.body.tahun;
+    try {
+        const vegetatif = await Vegetatif.findAll({
+            where: { tahun_tanam: tahun }
+        });
+        res.status(200).json(vegetatif);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+export const getDistinctTahunBulanVegetatif = async (req, res) => {
+ // select tahun dan bulan yang distinct
+    try {
+        const vegetatif = await Vegetatif.findAll({
+            attributes: [
+                [db_app.fn('DISTINCT', db_app.col('tahun')), 'tahun'],
+                [db_app.fn('DISTINCT', db_app.col('bulan')), 'bulan']
+            ],
+            order: [
+                ['tahun', 'ASC'],
+                ['bulan', 'ASC']
+            ]
+        });
+        res.status(200).json(vegetatif);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
