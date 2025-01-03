@@ -1,4 +1,5 @@
 import Vegetatif from '../models/VegetatifModel.js';
+import { db_app } from '../config/Database.js';
 
 // Get all Vegetatif records
 export const getAllVegetatif = async (req, res) => {
@@ -57,18 +58,8 @@ export const deleteVegetatif = async (req, res) => {
 
 export const getDistinctTahunBulanVegetatif = async (req, res) => {
     try {
-        const vegetatif = await Vegetatif.findAll({
-            attributes: [
-                'tahun', 
-                'bulan'
-            ],
-            group: ['tahun', 'bulan'], // Kelompokkan berdasarkan tahun dan bulan
-            order: [
-                ['tahun', 'ASC'],
-                ['bulan', 'ASC']
-            ]
-        });
-        res.status(200).json(vegetatif);
+        const distinctTahunBulan = await db_app.query("SELECT DISTINCT tahun, bulan FROM vegetatif", { type: db_app.QueryTypes.SELECT });
+        res.status(200).json(distinctTahunBulan);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
