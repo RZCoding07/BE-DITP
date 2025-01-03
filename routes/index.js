@@ -17,7 +17,7 @@ import {
   createVegetatif,
   updateVegetatif,
   deleteVegetatif
-} from '../controllers/vegetatif.js';
+} from '../controllers/Vegetatif.js';
 
 const $routes = express.Router();
 
