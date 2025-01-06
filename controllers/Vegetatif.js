@@ -83,6 +83,24 @@ function interpolate(x, xp, yp) {
     });
   }
   
+
+  function extrapolate(x, xp, yp) {
+    if (x < xp[0]) {
+      // Ekstrapolasi ke kiri
+      const x0 = xp[0];
+      const x1 = xp[1];
+      const y0 = yp[0];
+      const y1 = yp[1];
+      return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+    } else {
+      // Ekstrapolasi ke kanan
+      const x0 = xp[xp.length - 2];
+      const x1 = xp[xp.length - 1];
+      const y0 = yp[yp.length - 2];
+      const y1 = yp[yp.length - 1];
+      return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+    }
+  }
   
 
 
@@ -163,9 +181,14 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
   
     const x_full = Array.from({ length: 30 }, (_, i) => i + 1);
     const x_values_modified = [1, ...x_values];
-    const y_values_modified = [19, ...y_values];
+    const y_values_modified = y_values;
   
-    const y_full = interpolate(x_full, x_values_modified, y_values_modified);
+    const y_at_x1 = extrapolate(1, x_values_modified, y_values_modified);
+  
+    const x_values_combined = [1, ...x_values];
+    const y_values_combined = [y_at_x1, ...y_values];
+  
+    const y_full = interpolate(x_full, x_values_combined, y_values_combined);
   
     const result = Object.fromEntries(x_full.map((x, i) => [x, Number(y_full[i].toFixed(2))]));
   
