@@ -71,7 +71,7 @@ $routes.post('/vegetatif', createVegetatif);
 $routes.put('/vegetatif/:id', updateVegetatif);
 $routes.delete('/vegetatif/:id', deleteVegetatif);
 $routes.get('/vegetatif-distinct-tahun', getDistinctTahunBulanVegetatif);
-$routes.get('/vegetatif-rules', getRulesOfStandarisasiVegetatif);
+$routes.get('/interpolate', getRulesOfStandarisasiVegetatif);
 
 $routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
