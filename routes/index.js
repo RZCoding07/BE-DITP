@@ -17,7 +17,8 @@ import {
   createVegetatif,
   updateVegetatif,
   deleteVegetatif,
-  getDistinctTahunBulanVegetatif
+  getDistinctTahunBulanVegetatif,
+  getRulesOfStandarisasiVegetatif
 } from '../controllers/Vegetatif.js';
 
 const $routes = express.Router();
@@ -64,13 +65,13 @@ $routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-
 $routes.get('/vegetatif', getAllVegetatif);
 $routes.get('/vegetatif/:id', getVegetatifById);
 $routes.post('/vegetatif', createVegetatif);
 $routes.put('/vegetatif/:id', updateVegetatif);
 $routes.delete('/vegetatif/:id', deleteVegetatif);
 $routes.get('/vegetatif-distinct-tahun', getDistinctTahunBulanVegetatif);
+$routes.get('/vegetatif-rules', getRulesOfStandarisasiVegetatif);
 
 $routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
