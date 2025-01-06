@@ -160,7 +160,7 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 
     const x_full = Array.from({ length: 30 }, (_, i) => i + 1);
     const x_values_modified = [1, ...x_values];
-    const y_values_modified = [18, ...y_values];
+    const y_values_modified = y_column_index === 1 ?  [18, ...y_values] : y_values;
 
     const y_full = interpolate(x_full, x_values_modified, y_values_modified);
 
