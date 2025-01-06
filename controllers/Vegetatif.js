@@ -169,5 +169,5 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
   
     const result = Object.fromEntries(x_full.map((x, i) => [x, Number(y_full[i].toFixed(2))]));
   
-    res.json(result);
+    return res.json(result);
 }
