@@ -66,6 +66,25 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
 };
 
 
+function interpolate(x, xp, yp) {
+    return x.map(xi => {
+      if (xi <= xp[0]) return yp[0];
+      if (xi >= xp[xp.length - 1]) return yp[yp.length - 1];
+  
+      let i = 0;
+      while (xp[i] < xi) i++;
+  
+      const x0 = xp[i - 1];
+      const x1 = xp[i];
+      const y0 = yp[i - 1];
+      const y1 = yp[i];
+  
+      return y0 + (y1 - y0) * (xi - x0) / (x1 - x0);
+    });
+  }
+  
+  
+
 
 export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 
