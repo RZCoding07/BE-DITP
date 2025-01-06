@@ -1,11 +1,11 @@
 import { Sequelize } from "sequelize";
-import { db_app } from "../config/Database.js";const DataTypes = Sequelize;
+import { db_app } from "../config/Database.js"; const DataTypes = Sequelize;
 
 
 const Vegetatif = db_app.define('vegetatif', {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
+  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
 
-  entitas: {
+  rpc: {
     type: DataTypes.TEXT,
     allowNull: false
   },
@@ -20,7 +20,14 @@ const Vegetatif = db_app.define('vegetatif', {
   tahunTanam: {
     type: DataTypes.TEXT,
     allowNull: false,
-    field: 'tahun_tanam'
+  },
+  jpa: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  jpk: {
+    type: DataTypes.TEXT,
+    allowNull: false,
   },
   blok: {
     type: DataTypes.TEXT,
@@ -29,7 +36,6 @@ const Vegetatif = db_app.define('vegetatif', {
   luas: {
     type: DataTypes.TEXT,
     allowNull: false,
-    comment: 'Area in Hectares'
   },
   sph: {
     type: DataTypes.TEXT,
@@ -51,7 +57,7 @@ const Vegetatif = db_app.define('vegetatif', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
-  panjangRachis: { 
+  panjangRachis: {
     type: DataTypes.TEXT,
     allowNull: true,
   },
@@ -67,55 +73,6 @@ const Vegetatif = db_app.define('vegetatif', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
-  // Adding measurement points 1-6
-  measurement1L: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement1P: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement2L: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement2P: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement3L: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement3P: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement4L: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement4P: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement5L: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement5P: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement6L: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  measurement6P: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
   rerataL: {
     type: DataTypes.TEXT,
     allowNull: true,
@@ -126,15 +83,15 @@ const Vegetatif = db_app.define('vegetatif', {
     allowNull: true,
     comment: 'Average value P'
   },
-  tahun : {
+  tahun: {
     type: DataTypes.TEXT,
     allowNull: false
   },
-  bulan : {
+  bulan: {
     type: DataTypes.TEXT,
     allowNull: false
   }
-  
+
 }, { freezeTableName: true });
 
 export default Vegetatif;
