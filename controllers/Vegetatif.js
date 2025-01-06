@@ -87,7 +87,7 @@ function interpolate(x, xp, yp) {
 
 
 export const getRulesOfStandarisasiVegetatif = async (req, res) => {
-
+    const x_values = [6, 12, 18, 24, 30];
     const datasets = [
         [
             [29.7, 69.7, 96.7, 134.2, 167.0],
