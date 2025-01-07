@@ -4,84 +4,89 @@ import { db_app } from "../config/Database.js"; const DataTypes = Sequelize;
 
 const Vegetatif = db_app.define('vegetatif', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
-
-  rpc: {
+  regional: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
   },
   kebun: {
     type: DataTypes.TEXT,
-    allowNull: false
-  },
-  afd: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  tahunTanam: {
-    type: DataTypes.TEXT,
     allowNull: false,
   },
-  jpa: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
-  jpk: {
+  afdeling: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
   blok: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
   },
-  luas: {
+  tahun_tanam: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  sph: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
   varietas: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
   },
-  lingkarBatang: {
+  luas_ha: {
     type: DataTypes.TEXT,
-    allowNull: true,
+    allowNull: false,
   },
-  tinggiBatang: {
+  jumlah_pokok_awal_tanam: {
     type: DataTypes.TEXT,
-    allowNull: true,
+    allowNull: false,
   },
-  jumlahPelepah: {
+  jumlah_pokok_sekarang: {
     type: DataTypes.TEXT,
-    allowNull: true,
+    allowNull: false,
   },
-  panjangRachis: {
+  tinggi_tanaman_cm: {
     type: DataTypes.TEXT,
-    allowNull: true,
+    allowNull: false,
   },
-  lebarPetiolaL: {
+  jumlah_pelepah_bh: {
     type: DataTypes.TEXT,
-    allowNull: true,
+    allowNull: false,
   },
-  lebarPetiolaT: {
+  panjang_rachis_cm: {
     type: DataTypes.TEXT,
-    allowNull: true
+    allowNull: false,
   },
-  jad: {
+  lebar_petiola_min_cm: {
     type: DataTypes.TEXT,
-    allowNull: true,
+    allowNull: false,
   },
-  rerataL: {
+  lebar_petiola_max_cm: {
     type: DataTypes.TEXT,
-    allowNull: true,
-    comment: 'Average value L'
+    allowNull: false,
   },
-  rerataP: {
+  tebal_petiola_cm: {
     type: DataTypes.TEXT,
-    allowNull: true,
-    comment: 'Average value P'
+    allowNull: false,
+  },
+  jad_1_sisi: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  rerata_panjang_anak_daun_min: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  rerata_panjang_anak_daun_max: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  rerata_lebar_anak_daun_min: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  rerata_lebar_anak_daun_max: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  lingkar_batang_cm: {
+    type: DataTypes.TEXT,
+    allowNull: false,
   },
   tahun: {
     type: DataTypes.TEXT,
