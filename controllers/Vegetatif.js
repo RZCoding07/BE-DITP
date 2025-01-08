@@ -219,7 +219,7 @@ export const callProcVegetatif = async (req, res) => {
     
         res.json({
           success: true,
-          data: results,
+          data: results[0],
         });
       } catch (error) {
         console.error('Error executing procedure:', error);
