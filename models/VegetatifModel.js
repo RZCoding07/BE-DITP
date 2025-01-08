@@ -52,11 +52,7 @@ const Vegetatif = db_app.define('vegetatif', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  lebar_petiola_min_cm: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
-  lebar_petiola_max_cm: {
+  lebar_petiola_cm: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
@@ -68,19 +64,11 @@ const Vegetatif = db_app.define('vegetatif', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  rerata_panjang_anak_daun_min: {
+  rerata_panjang_anak_daun: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  rerata_panjang_anak_daun_max: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
-  rerata_lebar_anak_daun_min: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
-  rerata_lebar_anak_daun_max: {
+  rerata_lebar_anak_daun: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
