@@ -174,3 +174,58 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 
     return res.json(result);
 }
+
+
+export const callProcVegetatif = async (req, res) => {
+    try {
+        const {
+          input_filtered_by,
+          input_regional,
+          input_kebun,
+          input_afdeling,
+          input_blok,
+          input_bulan,
+          input_tahun,
+          input_tahun_tanam,
+        } = req.body;
+    
+        // Panggil prosedur dengan parameter
+        const results = await sequelize.query(
+          `CALL GetFilterVegetatif(
+            :input_filtered_by,
+            :input_regional,
+            :input_kebun,
+            :input_afdeling,
+            :input_blok,
+            :input_bulan,
+            :input_tahun,
+            :input_tahun_tanam
+          )`,
+          {
+            replacements: {
+              input_filtered_by,
+              input_regional,
+              input_kebun,
+              input_afdeling,
+              input_blok,
+              input_bulan,
+              input_tahun,
+              input_tahun_tanam,
+            },
+            type: sequelize.QueryTypes.RAW,
+          }
+        );
+    
+        res.json({
+          success: true,
+          data: results,
+        });
+      } catch (error) {
+        console.error('Error executing procedure:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Failed to execute procedure',
+          error: error.message,
+        });
+      }
+}

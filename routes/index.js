@@ -18,7 +18,8 @@ import {
   updateVegetatif,
   deleteVegetatif,
   getDistinctTahunBulanVegetatif,
-  getRulesOfStandarisasiVegetatif
+  getRulesOfStandarisasiVegetatif,
+  callProcVegetatif
 } from '../controllers/Vegetatif.js';
 
 const $routes = express.Router();
@@ -72,6 +73,7 @@ $routes.put('/vegetatif/:id', updateVegetatif);
 $routes.delete('/vegetatif/:id', deleteVegetatif);
 $routes.get('/vegetatif-distinct-tahun', getDistinctTahunBulanVegetatif);
 $routes.get('/interpolate', getRulesOfStandarisasiVegetatif);
+$routes.post('/vegetatif-proc', callProcVegetatif);
 
 $routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
