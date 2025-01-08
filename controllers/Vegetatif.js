@@ -1,6 +1,7 @@
 import Vegetatif from '../models/VegetatifModel.js';
 import { db_app } from '../config/Database.js';
 
+
 // Get all Vegetatif records
 export const getAllVegetatif = async (req, res) => {
     try {
@@ -190,7 +191,7 @@ export const callProcVegetatif = async (req, res) => {
         } = req.body;
     
         // Panggil prosedur dengan parameter
-        const results = await sequelize.query(
+        const results = await db_app.query(
           `CALL GetFilterVegetatif(
             :input_filtered_by,
             :input_regional,
@@ -211,8 +212,8 @@ export const callProcVegetatif = async (req, res) => {
               input_bulan,
               input_tahun,
               input_tahun_tanam,
-            },
-            type: sequelize.QueryTypes.RAW,
+            },  
+            type: db_app.QueryTypes.SELECT,
           }
         );
     
