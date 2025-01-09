@@ -57,14 +57,30 @@ export const deleteVegetatif = async (req, res) => {
     }
 };
 
+// Controller to fetch distinct 'tahun' and 'bulan' from the 'vegetatif' table
 export const getDistinctTahunBulanVegetatif = async (req, res) => {
     try {
-        const distinctTahunBulan = await db_app.query("SELECT DISTINCT tahun, bulan FROM vegetatif", { type: db_app.QueryTypes.SELECT });
-        res.status(200).json(distinctTahunBulan);
+        // Define the SQL query
+        const sqlQuery = "SELECT DISTINCT tahun, bulan FROM vegetatif";
+
+        // Execute the query
+        const distinctTahunBulan = await db_app.query(sqlQuery, {
+            type: db_app.QueryTypes.SELECT,
+        });
+
+        // Send successful response
+        return res.status(200).json(distinctTahunBulan);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        // Log the error for debugging
+        console.error("Error fetching distinct tahun and bulan:", error);
+
+        // Send error response
+        return res.status(500).json({
+            message: "Failed to fetch data. Please try again later.",
+        });
     }
 };
+
 
 
 function interpolate(x, xp, yp) {
