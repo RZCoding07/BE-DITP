@@ -71,7 +71,7 @@ $routes.get('/vegetatif/:id', getVegetatifById);
 $routes.post('/vegetatif', createVegetatif);
 $routes.put('/vegetatif/:id', updateVegetatif);
 $routes.delete('/vegetatif/:id', deleteVegetatif);
-$routes.get('/vegetatif-distinct-tahun', getDistinctTahunBulanVegetatif);
+$routes.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
 $routes.get('/interpolate', getRulesOfStandarisasiVegetatif);
 $routes.post('/vegetatif-proc', callProcVegetatif);
 
