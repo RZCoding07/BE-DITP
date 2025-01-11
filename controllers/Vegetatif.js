@@ -82,6 +82,30 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
 };
 
 
+export const getKebunWhereRegVegetatif = async (req, res) => {
+    try {
+        // Define the SQL query
+        const sqlQuery = "SELECT DISTINCT kebun FROM vegetatif WHERE regional = :regional";
+
+        // Execute the query
+        const distinctKebun = await db_app.query(sqlQuery, {
+            replacements: { regional: req.params.regional },
+            type: db_app.QueryTypes.SELECT,
+        });
+        // Send successful response
+        return res.status(200).json(distinctTahunBulan);
+    } catch (error) {
+        // Log the error for debugging
+        console.error("Error fetching distinct tahun and bulan:", error);
+
+        // Send error response
+        return res.status(500).json({
+            message: "Failed to fetch data. Please try again later.",
+        });
+    }
+};
+
+
 
 function interpolate(x, xp, yp) {
     return x.map(xi => {

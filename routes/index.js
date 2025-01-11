@@ -19,6 +19,7 @@ import {
   deleteVegetatif,
   getDistinctTahunBulanVegetatif,
   getRulesOfStandarisasiVegetatif,
+  getKebunWhereRegVegetatif,
   callProcVegetatif
 } from '../controllers/Vegetatif.js';
 
@@ -74,6 +75,7 @@ $routes.delete('/vegetatif/:id', deleteVegetatif);
 $routes.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
 $routes.get('/interpolate', getRulesOfStandarisasiVegetatif);
 $routes.post('/vegetatif-proc', callProcVegetatif);
+$routes.get('/get-kebun-where-reg-vegetatif', getKebunWhereRegVegetatif);
 
 $routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";

@@ -17,7 +17,7 @@ const app = express();
 // Allow all origins (or specify specific origins if needed)
 app.use(cors({
     origin: ["https://ev4palms.vercel.app", "http://localhost:3000"], // Frontend origin
-    methods: 'GET, POST, PUT, DELETE, OPTIONS', // Allowed methods
+    methods: 'GET, POST, PUT, DELETE, OPTIONS', // Allowed methods`
     allowedHeaders: 'Content-Type, Authorization, X-Requested-With', // Allowed headers
     credentials: true, // If you need cookies to be included in requests
 }));
