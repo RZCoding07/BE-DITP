@@ -89,7 +89,7 @@ export const getKebunWhereRegVegetatif = async (req, res) => {
 
         // Execute the query
         const distinctKebun = await db_app.query(sqlQuery, {
-            replacements: { regional: req.body.regional },
+            replacements: { regional: req.body.rpc},
             type: db_app.QueryTypes.SELECT,
         });
         // Send successful response
