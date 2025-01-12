@@ -84,8 +84,8 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
 
 export const getKebunWhereRegVegetatif = async (req, res) => {
     try {
-        // Define the SQL query
-        const sqlQuery = "SELECT DISTINCT kebun FROM vegetatif WHERE regional = :regional";
+        // Define the SQL query ASC dari te
+        const sqlQuery = "SELECT DISTINCT kebun FROM vegetatif WHERE regional = :regional ORDER BY kebun ASC";
 
         // Execute the query
         const distinctKebun = await db_app.query(sqlQuery, {
@@ -109,7 +109,7 @@ export const getKebunWhereRegVegetatif = async (req, res) => {
 export const getAfdWhereKebunVegetatif = async (req, res) => {
     try {
         // Define the SQL query
-        const sqlQuery = "SELECT DISTINCT afdeling FROM vegetatif WHERE regional = :regional AND kebun = :kebun";
+        const sqlQuery = "SELECT DISTINCT afdeling FROM vegetatif WHERE regional = :regional AND kebun = :kebun ORDER BY afdeling ASC";
 
         // Execute the query
         const distinctAfd = await db_app.query(sqlQuery, {
