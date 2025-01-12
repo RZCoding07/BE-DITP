@@ -102,18 +102,18 @@ export const getKebunWhereRegVegetatif = async (req, res) => {
         return res.status(500).json({
             message: "Failed to fetch data. Please try again later.",
         });
-    }
+    }z
 };
 
 
 export const getAfdWhereKebunVegetatif = async (req, res) => {
     try {
         // Define the SQL query
-        const sqlQuery = "SELECT DISTINCT afdeling FROM vegetatif WHERE kebun = :kebun";
+        const sqlQuery = "SELECT DISTINCT afdeling FROM vegetatif WHERE regional = :regional AND kebun = :kebun";
 
         // Execute the query
         const distinctAfd = await db_app.query(sqlQuery, {
-            replacements: { kebun: req.body.kebun },
+            replacements: { regional: req.body.rpc, kebun: req.body.kebun},
             type: db_app.QueryTypes.SELECT,
         });
     
