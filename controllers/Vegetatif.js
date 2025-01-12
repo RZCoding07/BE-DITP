@@ -89,11 +89,11 @@ export const getKebunWhereRegVegetatif = async (req, res) => {
 
         // Execute the query
         const distinctKebun = await db_app.query(sqlQuery, {
-            replacements: { regional: req.params.regional },
+            replacements: { regional: req.body.regional },
             type: db_app.QueryTypes.SELECT,
         });
         // Send successful response
-        return res.status(200).json(distinctTahunBulan);
+        return res.status(200).json(distinctKebun);
     } catch (error) {
         // Log the error for debugging
         console.error("Error fetching distinct tahun and bulan:", error);
@@ -113,7 +113,7 @@ export const getAfdWhereKebunVegetatif = async (req, res) => {
 
         // Execute the query
         const distinctAfd = await db_app.query(sqlQuery, {
-            replacements: { kebun: req.params.kebun },
+            replacements: { kebun: req.body.kebun },
             type: db_app.QueryTypes.SELECT,
         });
     
