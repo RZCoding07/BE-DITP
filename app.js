@@ -7,8 +7,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import { db_app } from './config/Database.js';
 import $routes from './routes/index.js';
-import BaseTBM from './models/BaseTBMModel.js';
-import Vegetatif from './models/VegetatifModel.js';
+import W from './models/PiModel.js';
 import { rateLimit } from 'express-rate-limit'
 
 dotenv.config();
@@ -29,7 +28,7 @@ app.use(morgan('dev'));
 const initializeDatabase = async () => {
     try {
         await db_app.authenticate(); // Test connection
-        // await db_app.sync({ alter: true }); // Sync models with database
+        await db_app.sync({ alter: true }); // Sync models with database
         // console.log('Connection has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);

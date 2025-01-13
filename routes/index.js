@@ -41,6 +41,10 @@ const uploadVegetatif = new Piscina({
   filename: path.resolve(__dirname, '../worker/WorkerVegetatif.js')
 });
 
+const uploadPi = new Piscina({
+  filename: path.resolve(__dirname, '../worker/WorkerPi.js')
+});
+
 // Routes for BaseTBM
 $routes.get('/base-tbm', getAllBaseTBM);
 $routes.get('/base-tbm/:id', getBaseTBMById);
@@ -54,6 +58,25 @@ $routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
   
   try {
     await uploadBaseTBM.runTask(mappedData);
+    res.status(200).json({
+      status_code: 200,
+      message: 'Upload Data Selesai!',
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status_code: 500,
+      message: 'Upload Data Gagal!',
+    });
+  }
+});
+
+$routes.post('/pi/upload', upload.single('file'), async (req, res) => {
+  let mappedData = req.body.mappedData || "[]";
+  
+  try {
+    await uploadPi.runTask(mappedData);
     res.status(200).json({
       status_code: 200,
       message: 'Upload Data Selesai!',
