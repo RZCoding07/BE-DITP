@@ -3,7 +3,7 @@ import { db_app } from "../config/Database.js";
 
 const DataTypes = Sequelize;
 
-const W = db.define('pi', {
+const W = db_app.define('pi', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
