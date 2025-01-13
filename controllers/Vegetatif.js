@@ -108,22 +108,17 @@ export const getKebunWhereRegVegetatif = async (req, res) => {
 
 export const getAfdWhereKebunVegetatif = async (req, res) => {
     try {
-        // Define the SQL query
         const sqlQuery = "SELECT DISTINCT afdeling FROM vegetatif WHERE regional = :regional AND kebun = :kebun ORDER BY afdeling ASC";
 
-        // Execute the query
         const distinctAfd = await db_app.query(sqlQuery, {
             replacements: { regional: req.body.rpc, kebun: req.body.kebun},
             type: db_app.QueryTypes.SELECT,
         });
     
-        // Send successful response
         return res.status(200).json(distinctAfd);
     } catch (error) {
-        // Log the error for debugging
         console.error("Error fetching distinct tahun and bulan:", error);
 
-        // Send error response
         return res.status(500).json({
             message: "Failed to fetch data. Please try again later.",
         });
@@ -226,12 +221,13 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
     const x_full = Array.from({ length: 30 }, (_, i) => i + 1);
     const x_values_modified = [1, ...x_values];
     const y_values_modified = 
-    y_column_index === 1 
-        ? [18, ...y_values] 
-        : y_column_index === 8 
-            ? [48.5, ...y_values] 
-            : y_values;
-
+    y_column_index === 0 
+        ? [21, ...y_values] 
+        : y_column_index === 1
+            ? [18, ...y_values] 
+            : y_column_index === 8
+                ? [48.5, ...y_values]
+                : y_values;
 
     const y_full = interpolate(x_full, x_values_modified, y_values_modified);
 
