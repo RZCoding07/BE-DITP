@@ -1,6 +1,8 @@
 import Vegetatif from '../models/VegetatifModel.js';
 import { db_app } from '../config/Database.js';
+import NodeCache from 'node-cache';
 
+const cache = new NodeCache({ stdTTL: 600, checkperiod: 120 }); // Cache expires after 600 seconds (10 minutes)
 
 // Get all Vegetatif records
 export const getAllVegetatif = async (req, res) => {
@@ -237,59 +239,78 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 }
 
 
+
+// Fungsi dengan caching
 export const callProcVegetatif = async (req, res) => {
     try {
-        const {
-          input_filtered_by,
-          input_regional,
-          input_kebun,
-          input_afdeling,
-          input_blok,
-          input_bulan,
-          input_tahun,
-          input_tahun_tanam,
-          input_tbm,
-        } = req.body;
-    
-        // Panggil prosedur dengan parameter
-        const results = await db_app.query(
-          `CALL GetFilterVegetatif(
-            :input_filtered_by,
-            :input_regional,
-            :input_kebun,
-            :input_afdeling,
-            :input_blok,
-            :input_bulan,
-            :input_tahun,
-            :input_tahun_tanam,
-            :input_tbm
-          )`,
-          {
-            replacements: {
-              input_filtered_by,
-              input_regional,
-              input_kebun,
-              input_afdeling,
-              input_blok,
-              input_bulan,
-              input_tahun,
-              input_tahun_tanam,
-                input_tbm,
-            },  
-            type: db_app.QueryTypes.SELECT,
-          }
-        );
-    
-        res.json({
+      const {
+        input_filtered_by,
+        input_regional,
+        input_kebun,
+        input_afdeling,
+        input_blok,
+        input_bulan,
+        input_tahun,
+        input_tahun_tanam,
+        input_tbm,
+      } = req.body;
+  
+      // Generate cache key berdasarkan parameter
+      const cacheKey = `vegetatif:${input_filtered_by}:${input_regional}:${input_kebun}:${input_afdeling}:${input_blok}:${input_bulan}:${input_tahun}:${input_tahun_tanam}:${input_tbm}`;
+  
+      // Cek apakah data sudah ada di cache
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        return res.json({
           success: true,
-          data: results[0],
-        });
-      } catch (error) {
-        console.error('Error executing procedure:', error);
-        res.status(500).json({
-          success: false,
-          message: 'Failed to execute procedure',
-          error: error.message,
+          data: cachedData,
+          source: 'cache',
         });
       }
-}
+  
+      // Panggil prosedur jika data tidak ditemukan di cache
+      const results = await db_app.query(
+        `CALL GetFilterVegetatif(
+          :input_filtered_by,
+          :input_regional,
+          :input_kebun,
+          :input_afdeling,
+          :input_blok,
+          :input_bulan,
+          :input_tahun,
+          :input_tahun_tanam,
+          :input_tbm
+        )`,
+        {
+          replacements: {
+            input_filtered_by,
+            input_regional,
+            input_kebun,
+            input_afdeling,
+            input_blok,
+            input_bulan,
+            input_tahun,
+            input_tahun_tanam,
+            input_tbm,
+          },
+          type: db_app.QueryTypes.SELECT,
+        }
+      );
+  
+      // Simpan hasil ke cache
+      cache.set(cacheKey, results[0]);
+  
+      res.json({
+        success: true,
+        data: results[0],
+        source: 'database',
+      });
+    } catch (error) {
+      console.error('Error executing procedure:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to execute procedure',
+        error: error.message,
+      });
+    }
+  };
