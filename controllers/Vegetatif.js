@@ -248,6 +248,7 @@ export const callProcVegetatif = async (req, res) => {
           input_bulan,
           input_tahun,
           input_tahun_tanam,
+          input_tbm,
         } = req.body;
     
         // Panggil prosedur dengan parameter
@@ -260,7 +261,8 @@ export const callProcVegetatif = async (req, res) => {
             :input_blok,
             :input_bulan,
             :input_tahun,
-            :input_tahun_tanam
+            :input_tahun_tanam,
+            :input_tbm
           )`,
           {
             replacements: {
@@ -272,6 +274,7 @@ export const callProcVegetatif = async (req, res) => {
               input_bulan,
               input_tahun,
               input_tahun_tanam,
+                input_tbm,
             },  
             type: db_app.QueryTypes.SELECT,
           }
