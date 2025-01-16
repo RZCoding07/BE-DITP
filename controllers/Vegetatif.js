@@ -1,6 +1,7 @@
 import Vegetatif from '../models/VegetatifModel.js';
 import { db_app } from '../config/Database.js';
 import NodeCache from 'node-cache';
+import zlib from 'zlib';
 
 const cache = new NodeCache({ stdTTL: 600, checkperiod: 120 }); // Cache expires after 600 seconds (10 minutes)
 
@@ -241,6 +242,7 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 
 
 // Fungsi dengan caching
+
 export const callProcVegetatif = async (req, res) => {
     try {
       const {
@@ -261,11 +263,10 @@ export const callProcVegetatif = async (req, res) => {
       // Cek apakah data sudah ada di cache
       const cachedData = cache.get(cacheKey);
       if (cachedData) {
-        return res.json({
-          success: true,
-          data: cachedData,
-          source: 'cache',
-        });
+        // Kompres data cache dengan gzip
+        const compressedData = zlib.gzipSync(JSON.stringify(cachedData));
+        res.setHeader('Content-Encoding', 'gzip');
+        return res.send(compressedData);
       }
   
       // Panggil prosedur jika data tidak ditemukan di cache
@@ -300,11 +301,10 @@ export const callProcVegetatif = async (req, res) => {
       // Simpan hasil ke cache
       cache.set(cacheKey, results[0]);
   
-      res.json({
-        success: true,
-        data: results[0],
-        source: 'database',
-      });
+      // Kompres data hasil query dengan gzip
+      const compressedData = zlib.gzipSync(JSON.stringify(results[0]));
+      res.setHeader('Content-Encoding', 'gzip');
+      res.send(compressedData);
     } catch (error) {
       console.error('Error executing procedure:', error);
       res.status(500).json({
