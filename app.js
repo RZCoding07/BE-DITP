@@ -7,16 +7,16 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import { db_app } from './config/Database.js';
 import $routes from './routes/index.js';
-import W from './models/PiModel.js';
 import { rateLimit } from 'express-rate-limit'
-
+import compression from "compression";
 dotenv.config();
 
 const app = express();
+app.use(compression());
 // Allow all origins (or specify specific origins if needed)
 app.use(cors({
     origin: ["https://ev4palms.vercel.app", "http://localhost:3000"], // Frontend origin
-    methods: 'GET, POST, PUT, DELETE, OPTIONS', // Allowed methods`
+    methods: 'GET, POST, PUT, DELETE, OPTIONS', // Allowed methods
     allowedHeaders: 'Content-Type, Authorization, X-Requested-With', // Allowed headers
     credentials: true, // If you need cookies to be included in requests
 }));
@@ -28,12 +28,11 @@ app.use(morgan('dev'));
 const initializeDatabase = async () => {
     try {
         await db_app.authenticate(); // Test connection
-        await db_app.sync({ alter: true }); // Sync models with database
-        // console.log('Connection has been established successfully.');
+        console.log('Connection has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }
-};
+}
 
 initializeDatabase();
 
@@ -53,7 +52,7 @@ app.use((err, req, res, next) => {
 
 const limiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 menit
-    max: 100, // Maksimal 100 permintaan per menit per IP
+    max: 1000, // Maksimal 100 permintaan per menit per IP
     message: "Terlalu banyak permintaan dari IP ini. Salam dari RZ Security Protocol!",
 })
 
@@ -64,4 +63,5 @@ const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
     console.log('Server running on port ' + PORT);
-});
+  });
+  
