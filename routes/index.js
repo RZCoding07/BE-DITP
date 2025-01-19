@@ -98,7 +98,7 @@ $routes.put('/vegetatif/:id', updateVegetatif);
 $routes.delete('/vegetatif/:id', deleteVegetatif);
 $routes.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
 $routes.get('/interpolate', getRulesOfStandarisasiVegetatif);
-$routes.get('/vegetatif-proc', callProcVegetatif);
+$routes.post('/vegetatif-proc', callProcVegetatif);
 $routes.post('/get-kebun-where-reg-vegetatif', getKebunWhereRegVegetatif);
 $routes.post('/get-afd-where-kebun-vegetatif', getAfdWhereKebunVegetatif);
 $routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
