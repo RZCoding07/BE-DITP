@@ -11,15 +11,17 @@ export const getAllWhy = async (req, res) => {
 
         if (why) {
             return res.status(200).json(why);
+        } else {
+
+            const sqlQuery = "SELECT * FROM vw_pi";
+
+            const result = await db_app.query(sqlQuery);
+
+            cache.set(key, result);
+
+            res.status(200).json(result);
         }
 
-        const sqlQuery = "SELECT * FROM vw_pi";
-
-        const result = await db_app.query(sqlQuery);
-
-        cache.set(key, result);
-
-        res.status(200).json(result);
 
     } catch (error) {
         // Handle any errors that occur during the process
