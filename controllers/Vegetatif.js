@@ -3,30 +3,60 @@ import { db_app } from '../config/Database.js';
 import NodeCache from 'node-cache';
 import zlib from 'zlib';
 
-const cache = new NodeCache({ stdTTL: 600, checkperiod: 120 }); // Cache expires after 600 seconds (10 minutes)
 
-// Get all Vegetatif records
+// Initialize the cache (with a 10-minute TTL for cached data)
+const cache = new NodeCache({ stdTTL: 600, checkperiod: 120 });
+
+
+// Get all Vegetatif records with caching
 export const getAllVegetatif = async (req, res) => {
     try {
+        const cacheKey = 'vegetatif:getAll';
+        const cachedData = cache.get(cacheKey);
+        
+        if (cachedData) {
+            // Compress cached data with gzip
+            const compressedData = zlib.gzipSync(JSON.stringify(cachedData));
+            res.setHeader('Content-Encoding', 'gzip');
+            return res.send(compressedData);
+        }
+
+        // Fetch data from database if not in cache
         const vegetatif = await Vegetatif.findAll();
+        cache.set(cacheKey, vegetatif);
+
         res.status(200).json(vegetatif);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// Get a single Vegetatif record by ID
+// Get a single Vegetatif record by ID with caching
 export const getVegetatifById = async (req, res) => {
     try {
+        const cacheKey = `vegetatif:getById:${req.params.id}`;
+        const cachedData = cache.get(cacheKey);
+        
+        if (cachedData) {
+            // Compress cached data with gzip
+            const compressedData = zlib.gzipSync(JSON.stringify(cachedData));
+            res.setHeader('Content-Encoding', 'gzip');
+            return res.send(compressedData);
+        }
+
+        // Fetch data from database if not in cache
         const vegetatif = await Vegetatif.findByPk(req.params.id);
         if (!vegetatif) return res.status(404).json({ message: "Record not found" });
+
+        cache.set(cacheKey, vegetatif);
+
         res.status(200).json(vegetatif);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// Create a new Vegetatif record
+// Create a new Vegetatif record (no caching needed)
 export const createVegetatif = async (req, res) => {
     try {
         const newRecord = await Vegetatif.create(req.body);
@@ -36,7 +66,7 @@ export const createVegetatif = async (req, res) => {
     }
 };
 
-// Update a Vegetatif record
+// Update a Vegetatif record (no caching needed)
 export const updateVegetatif = async (req, res) => {
     try {
         const vegetatif = await Vegetatif.findByPk(req.params.id);
@@ -48,7 +78,7 @@ export const updateVegetatif = async (req, res) => {
     }
 };
 
-// Delete a Vegetatif record
+// Delete a Vegetatif record (no caching needed)
 export const deleteVegetatif = async (req, res) => {
     try {
         const vegetatif = await Vegetatif.findByPk(req.params.id);
@@ -60,9 +90,19 @@ export const deleteVegetatif = async (req, res) => {
     }
 };
 
-// Controller to fetch distinct 'tahun' and 'bulan' from the 'vegetatif' table
+// Controller to fetch distinct 'tahun' and 'bulan' from the 'vegetatif' table with caching
 export const getDistinctTahunBulanVegetatif = async (req, res) => {
     try {
+        const cacheKey = 'vegetatif:getDistinctTahunBulan';
+        const cachedData = cache.get(cacheKey);
+        
+        if (cachedData) {
+            // Compress cached data with gzip
+            const compressedData = zlib.gzipSync(JSON.stringify(cachedData));
+            res.setHeader('Content-Encoding', 'gzip');
+            return res.send(compressedData);
+        }
+
         // Define the SQL query
         const sqlQuery = "SELECT DISTINCT tahun, bulan FROM vegetatif";
 
@@ -71,57 +111,74 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
             type: db_app.QueryTypes.SELECT,
         });
 
-        // Send successful response
+        cache.set(cacheKey, distinctTahunBulan);
+
         return res.status(200).json(distinctTahunBulan);
     } catch (error) {
-        // Log the error for debugging
         console.error("Error fetching distinct tahun and bulan:", error);
-
-        // Send error response
         return res.status(500).json({
             message: "Failed to fetch data. Please try again later.",
         });
     }
 };
 
-
+// Controller to fetch distinct 'kebun' based on 'regional' with caching
 export const getKebunWhereRegVegetatif = async (req, res) => {
     try {
-        // Define the SQL query ASC dari te
+        const cacheKey = `vegetatif:getKebunWhereReg:${req.body.rpc}`;
+        const cachedData = cache.get(cacheKey);
+        
+        if (cachedData) {
+            // Compress cached data with gzip
+            const compressedData = zlib.gzipSync(JSON.stringify(cachedData));
+            res.setHeader('Content-Encoding', 'gzip');
+            return res.send(compressedData);
+        }
+
         const sqlQuery = "SELECT DISTINCT kebun FROM vegetatif WHERE regional = :regional ORDER BY kebun ASC";
 
         // Execute the query
         const distinctKebun = await db_app.query(sqlQuery, {
-            replacements: { regional: req.body.rpc},
+            replacements: { regional: req.body.rpc },
             type: db_app.QueryTypes.SELECT,
         });
-        // Send successful response
+
+        cache.set(cacheKey, distinctKebun);
+
         return res.status(200).json(distinctKebun);
     } catch (error) {
-        // Log the error for debugging
         console.error("Error fetching distinct tahun and bulan:", error);
-
-        // Send error response
         return res.status(500).json({
             message: "Failed to fetch data. Please try again later.",
         });
-    }z
+    }
 };
 
-
+// Controller to fetch distinct 'afdeling' based on 'regional' and 'kebun' with caching
 export const getAfdWhereKebunVegetatif = async (req, res) => {
     try {
+        const cacheKey = `vegetatif:getAfdWhereKebun:${req.body.rpc}:${req.body.kebun}`;
+        const cachedData = cache.get(cacheKey);
+        
+        if (cachedData) {
+            // Compress cached data with gzip
+            const compressedData = zlib.gzipSync(JSON.stringify(cachedData));
+            res.setHeader('Content-Encoding', 'gzip');
+            return res.send(compressedData);
+        }
+
         const sqlQuery = "SELECT DISTINCT afdeling FROM vegetatif WHERE regional = :regional AND kebun = :kebun ORDER BY afdeling ASC";
 
         const distinctAfd = await db_app.query(sqlQuery, {
-            replacements: { regional: req.body.rpc, kebun: req.body.kebun},
+            replacements: { regional: req.body.rpc, kebun: req.body.kebun },
             type: db_app.QueryTypes.SELECT,
         });
-    
+
+        cache.set(cacheKey, distinctAfd);
+
         return res.status(200).json(distinctAfd);
     } catch (error) {
-        console.error("Error fetching distinct tahun and bulan:", error);
-
+        console.error("Error fetching distinct afdeling:", error);
         return res.status(500).json({
             message: "Failed to fetch data. Please try again later.",
         });
@@ -240,50 +297,10 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 }
 
 
-
-// Fungsi dengan caching
-
+// Function for calling procedure with caching (no change needed, already using cache)
 export const callProcVegetatif = async (req, res) => {
     try {
-      const {
-        input_filtered_by,
-        input_regional,
-        input_kebun,
-        input_afdeling,
-        input_blok,
-        input_bulan,
-        input_tahun,
-        input_tahun_tanam,
-        input_tbm,
-      } = req.body;
-  
-      // Generate cache key berdasarkan parameter
-      const cacheKey = `vegetatif:${input_filtered_by}:${input_regional}:${input_kebun}:${input_afdeling}:${input_blok}:${input_bulan}:${input_tahun}:${input_tahun_tanam}:${input_tbm}`;
-  
-      // Cek apakah data sudah ada di cache
-      const cachedData = cache.get(cacheKey);
-      if (cachedData) {
-        // Kompres data cache dengan gzip
-        const compressedData = zlib.gzipSync(JSON.stringify(cachedData));
-        res.setHeader('Content-Encoding', 'gzip');
-        return res.send(compressedData);
-      }
-  
-      // Panggil prosedur jika data tidak ditemukan di cache
-      const results = await db_app.query(
-        `CALL GetFilterVegetatif(
-          :input_filtered_by,
-          :input_regional,
-          :input_kebun,
-          :input_afdeling,
-          :input_blok,
-          :input_bulan,
-          :input_tahun,
-          :input_tahun_tanam,
-          :input_tbm
-        )`,
-        {
-          replacements: {
+        const {
             input_filtered_by,
             input_regional,
             input_kebun,
@@ -293,24 +310,57 @@ export const callProcVegetatif = async (req, res) => {
             input_tahun,
             input_tahun_tanam,
             input_tbm,
-          },
-          type: db_app.QueryTypes.SELECT,
+        } = req.body;
+    
+        // Generate cache key
+        const cacheKey = `vegetatif:${input_filtered_by}:${input_regional}:${input_kebun}:${input_afdeling}:${input_blok}:${input_bulan}:${input_tahun}:${input_tahun_tanam}:${input_tbm}`;
+    
+        const cachedData = cache.get(cacheKey);
+        if (cachedData) {
+            const compressedData = zlib.gzipSync(JSON.stringify(cachedData));
+            res.setHeader('Content-Encoding', 'gzip');
+            return res.send(compressedData);
         }
-      );
-  
-      // Simpan hasil ke cache
-      cache.set(cacheKey, results[0]);
-  
-      // Kompres data hasil query dengan gzip
-      const compressedData = zlib.gzipSync(JSON.stringify(results[0]));
-      res.setHeader('Content-Encoding', 'gzip');
-      res.send(compressedData);
+    
+        const results = await db_app.query(
+            `CALL GetFilterVegetatif(
+                :input_filtered_by,
+                :input_regional,
+                :input_kebun,
+                :input_afdeling,
+                :input_blok,
+                :input_bulan,
+                :input_tahun,
+                :input_tahun_tanam,
+                :input_tbm
+            )`,
+            {
+                replacements: {
+                    input_filtered_by,
+                    input_regional,
+                    input_kebun,
+                    input_afdeling,
+                    input_blok,
+                    input_bulan,
+                    input_tahun,
+                    input_tahun_tanam,
+                    input_tbm,
+                },
+                type: db_app.QueryTypes.SELECT,
+            }
+        );
+    
+        cache.set(cacheKey, results[0]);
+    
+        const compressedData = zlib.gzipSync(JSON.stringify(results[0]));
+        res.setHeader('Content-Encoding', 'gzip');
+        res.send(compressedData);
     } catch (error) {
-      console.error('Error executing procedure:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to execute procedure',
-        error: error.message,
-      });
+        console.error('Error executing procedure:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to execute procedure',
+            error: error.message,
+        });
     }
-  };
+};
