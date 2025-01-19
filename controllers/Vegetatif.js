@@ -255,7 +255,7 @@ export const callProcVegetatif = async (req, res) => {
         input_tahun,
         input_tahun_tanam,
         input_tbm,
-      } = req.body;
+      } = req.query;
   
       // Generate cache key berdasarkan parameter
       const cacheKey = `vegetatif:${input_filtered_by}:${input_regional}:${input_kebun}:${input_afdeling}:${input_blok}:${input_bulan}:${input_tahun}:${input_tahun_tanam}:${input_tbm}`;
