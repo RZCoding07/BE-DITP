@@ -8,24 +8,21 @@ export const getAllWhy = async (req, res) => {
     try {
         const key = 'why';
         let why = cache.get(key);
-        if (!why) {
-            const sqlQuery = "SELECT * FROM vw_pi";
 
-            db_app.query(sqlQuery, (
-                err,
-                result
-            ) => {
-                if (err) {
-                    res.status(500).json({ message: err.message });
-                } else {
-                    why = result;
-                    cache.set(key, why);
-                    res.status(200).json(why);
-                }
-            }
-            );
+        if (why) {
+            return res.status(200).json(why);
         }
+
+        const sqlQuery = "SELECT * FROM vw_pi";
+
+        const result = await db_app.query(sqlQuery);
+
+        cache.set(key, result);
+
+        res.status(200).json(result);
+
     } catch (error) {
+        // Handle any errors that occur during the process
         res.status(500).json({ message: error.message });
     }
-}
+};
