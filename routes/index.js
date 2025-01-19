@@ -24,6 +24,8 @@ import {
   callProcVegetatif
 } from '../controllers/Vegetatif.js';
 
+import { getAllWhy } from "../controllers/Why.js";
+
 const $routes = express.Router();
 
 const storage = multer.memoryStorage();
@@ -51,6 +53,7 @@ $routes.get('/base-tbm/:id', getBaseTBMById);
 $routes.post('/base-tbm', createBaseTBM);
 $routes.put('/base-tbm/:id', updateBaseTBM);
 $routes.delete('/base-tbm/:id', deleteBaseTBM);
+$routes.get('/why', getAllWhy);
 
 
 $routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
