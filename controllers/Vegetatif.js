@@ -107,13 +107,6 @@ export const deleteVegetatif = async (req, res) => {
 
 export const getDistinctTahunBulanVegetatif = async (req, res) => {
     try {
-        // Cek apakah data ada di cache
-        const cachedData = cache.get('distinctTahunBulan');
-        if (cachedData) {
-            console.log("Cache hit for distinctTahunBulan");
-            return res.status(200).json(cachedData);
-        }
-
         // Query SQL untuk mengambil data distinct tahun dan bulan
         const sqlQuery = "SELECT DISTINCT tahun, bulan FROM vegetatif";
 
@@ -121,9 +114,6 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
         const distinctTahunBulan = await db_app.query(sqlQuery, {
             type: db_app.QueryTypes.SELECT,
         });
-
-        // Simpan hasil query ke cache
-        cache.set('distinctTahunBulan', distinctTahunBulan);
 
         // Kirim data sebagai response
         return res.status(200).json(distinctTahunBulan);
@@ -134,6 +124,7 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
         });
     }
 };
+
 
 export const getKebunWhereRegVegetatif = async (req, res) => {
     try {
