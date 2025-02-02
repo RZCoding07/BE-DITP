@@ -305,19 +305,12 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 export const callProcVegetatif = async (req, res) => {
     try {
         const {
-            input_filtered_by,
-            input_regional,
-            input_kebun,
-            input_afdeling,
-            input_blok,
-            input_bulan,
-            input_tahun,
-            input_tahun_tanam,
             input_tbm,
+            input_tahun_tanam,
         } = req.body;
 
         // Generate cache key berdasarkan parameter
-        const cacheKey = `vegetatif:${input_filtered_by}:${input_regional}:${input_kebun}:${input_afdeling}:${input_blok}:${input_bulan}:${input_tahun}:${input_tahun_tanam}:${input_tbm}`;
+        const cacheKey = `vegetatif:${input_tbm}:${input_tahun_tanam}`;
 
         // Cek apakah data sudah ada di cache
         const cachedData = cache.get(cacheKey);
@@ -337,8 +330,8 @@ export const callProcVegetatif = async (req, res) => {
         )`,
             {
                 replacements: {
-                    input_tbm, 
-                    input_tahun_tanam,
+                    input_tbm,
+                    input_tahun_tanam
                 },
                 type: db_app.QueryTypes.SELECT,
             }
