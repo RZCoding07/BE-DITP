@@ -325,18 +325,17 @@ export const callProcVegetatif = async (req, res) => {
         // Panggil prosedur jika data tidak ditemukan di cache
         const results = await db_app.query(
             `CALL "GetFilterVegetatif"(
-                :input_tbm,
-                :input_tahun_tanam
+                CAST(:input_tbm AS TEXT),
+                CAST(:input_tahun_tanam AS INTEGER)
             )`,
             {
                 replacements: {
                     input_tbm,
-                    input_tahun_tanam: parseInt(input_tahun_tanam, 10),
+                    input_tahun_tanam,
                 },
                 type: db_app.QueryTypes.SELECT,
             }
         );
-        
         // Simpan hasil ke cache
         cache.set(cacheKey, results[0]);
 
