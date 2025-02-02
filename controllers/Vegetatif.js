@@ -18,7 +18,7 @@ export const getAllVegetatif = async (req, res) => {
 
         // Ambil data dari database jika tidak ada di cache
         const vegetatif = await Vegetatif.findAll();
-        
+
         // Simpan hasil query ke cache
         cache.set('allVegetatif', vegetatif);
 
@@ -32,7 +32,7 @@ export const getAllVegetatif = async (req, res) => {
 export const getVegetatifById = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Cek apakah data ada di cache
         const cachedData = cache.get(`vegetatif-${id}`);
         if (cachedData) {
@@ -72,7 +72,7 @@ export const updateVegetatif = async (req, res) => {
     try {
         const vegetatif = await Vegetatif.findByPk(req.params.id);
         if (!vegetatif) return res.status(404).json({ message: "Record not found" });
-        
+
         await vegetatif.update(req.body);
 
         // Clear cache so the data is refreshed
@@ -283,14 +283,14 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 
     const x_full = Array.from({ length: 30 }, (_, i) => i + 1);
     const x_values_modified = [1, ...x_values];
-    const y_values_modified = 
-    y_column_index === 0 
-        ? [21, ...y_values] 
-        : y_column_index === 1
-            ? [18, ...y_values] 
-            : y_column_index === 8
-                ? [48.5, ...y_values]
-                : y_values;
+    const y_values_modified =
+        y_column_index === 0
+            ? [21, ...y_values]
+            : y_column_index === 1
+                ? [18, ...y_values]
+                : y_column_index === 8
+                    ? [48.5, ...y_values]
+                    : y_values;
 
     const y_full = interpolate(x_full, x_values_modified, y_values_modified);
 
@@ -304,34 +304,34 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 // Fungsi dengan caching
 export const callProcVegetatif = async (req, res) => {
     try {
-      const {
-        input_filtered_by,
-        input_regional,
-        input_kebun,
-        input_afdeling,
-        input_blok,
-        input_bulan,
-        input_tahun,
-        input_tahun_tanam,
-        input_tbm,
-      } = req.body;
-  
-      // Generate cache key berdasarkan parameter
-      const cacheKey = `vegetatif:${input_filtered_by}:${input_regional}:${input_kebun}:${input_afdeling}:${input_blok}:${input_bulan}:${input_tahun}:${input_tahun_tanam}:${input_tbm}`;
-  
-      // Cek apakah data sudah ada di cache
-      const cachedData = cache.get(cacheKey);
-      if (cachedData) {
-        return res.json({
-          success: true,
-          data: cachedData,
-          source: 'cache',
-        });
-      }
-  
-      // Panggil prosedur jika data tidak ditemukan di cache
-      const results = await db_app.query(
-        `CALL GetFilterVegetatif(
+        const {
+            input_filtered_by,
+            input_regional,
+            input_kebun,
+            input_afdeling,
+            input_blok,
+            input_bulan,
+            input_tahun,
+            input_tahun_tanam,
+            input_tbm,
+        } = req.body;
+
+        // Generate cache key berdasarkan parameter
+        const cacheKey = `vegetatif:${input_filtered_by}:${input_regional}:${input_kebun}:${input_afdeling}:${input_blok}:${input_bulan}:${input_tahun}:${input_tahun_tanam}:${input_tbm}`;
+
+        // Cek apakah data sudah ada di cache
+        const cachedData = cache.get(cacheKey);
+        if (cachedData) {
+            return res.json({
+                success: true,
+                data: cachedData,
+                source: 'cache',
+            });
+        }
+
+        // Panggil prosedur jika data tidak ditemukan di cache
+        const results = await db_app.query(
+            `CALL GetFilterVegetatif(
           :input_filtered_by,
           :input_regional,
           :input_kebun,
@@ -342,36 +342,36 @@ export const callProcVegetatif = async (req, res) => {
           :input_tahun_tanam,
           :input_tbm
         )`,
-        {
-          replacements: {
-            input_filtered_by,
-            input_regional,
-            input_kebun,
-            input_afdeling,
-            input_blok,
-            input_bulan,
-            input_tahun,
-            input_tahun_tanam,
-            input_tbm,
-          },
-          type: db_app.QueryTypes.SELECT,
-        }
-      );
-  
-      // Simpan hasil ke cache
-      cache.set(cacheKey, results[0]);
-  
-      res.json({
-        success: true,
-        data: results[0],
-        source: 'database',
-      });
+            {
+                replacements: {
+                    input_filtered_by,
+                    input_regional,
+                    input_kebun,
+                    input_afdeling,
+                    input_blok,
+                    input_bulan,
+                    input_tahun,
+                    input_tahun_tanam,
+                    input_tbm,
+                },
+                type: db_app.QueryTypes.SELECT,
+            }
+        );
+
+        // Simpan hasil ke cache
+        cache.set(cacheKey, results[0]);
+
+        res.json({
+            success: true,
+            data: results[0],
+            source: 'database',
+        });
     } catch (error) {
-      console.error('Error executing procedure:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to execute procedure',
-        error: error.message,
-      });
+        console.error('Error executing procedure:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to execute procedure',
+            error: error.message,
+        });
     }
-  };
+};
