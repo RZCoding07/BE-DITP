@@ -309,6 +309,9 @@ export const callProcVegetatif = async (req, res) => {
             input_tahun_tanam,
         } = req.body;
 
+        // Generate cache key berdasarkan parameter
+        const cacheKey = `vegetatif:${input_tbm}:${input_tahun_tanam}`;
+
         // Cek apakah data sudah ada di cache
         const cachedData = cache.get(cacheKey);
         if (cachedData) {
@@ -332,10 +335,7 @@ export const callProcVegetatif = async (req, res) => {
         
         // Simpan hasil ke cache
         cache.set(cacheKey, results);
-
-        console.log(`Cache set for key: ${cacheKey}`);
-        console.log(`Results: ${results}`);
-
+        
         res.json({
             success: true,
             data: results,
