@@ -76,9 +76,6 @@ $routes.delete('/serapan-biaya/:id', deleteSerapanBiaya);
 
 $routes.get('/serapan-biaya-distinct-year', getDistinctTahunBulanSerapanBiaya);
 
-$routes.post('/serapan-biaya-kebun-where-bulan-tahun', getDistinctKebunSerapanBiayaWhereBulanTahun);
-
-
 $routes.get('/why', getAllWhy);
 
 $routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
