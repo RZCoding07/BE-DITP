@@ -24,6 +24,15 @@ import {
   callProcVegetatif
 } from '../controllers/Vegetatif.js';
 
+import {
+  getAllSerapanBiaya,
+  getSerapanBiayaById,
+  createSerapanBiaya,
+  updateSerapanBiaya,
+  deleteSerapanBiaya,
+  getDistinctTahunBulanSerapanBiaya
+} from '../controllers/SerapanBiaya.js';
+
 import { getAllWhy } from "../controllers/Why.js";
 
 const $routes = express.Router();
@@ -47,18 +56,33 @@ const uploadPi = new Piscina({
   filename: path.resolve(__dirname, '../worker/WorkerPi.js')
 });
 
+const uploadSerapanBiaya = new Piscina({
+  filename: path.resolve(__dirname, '../worker/WorkerSerapanBiaya.js')
+});
+
 // Routes for BaseTBM
 $routes.get('/base-tbm', getAllBaseTBM);
 $routes.get('/base-tbm/:id', getBaseTBMById);
 $routes.post('/base-tbm', createBaseTBM);
 $routes.put('/base-tbm/:id', updateBaseTBM);
 $routes.delete('/base-tbm/:id', deleteBaseTBM);
-$routes.get('/why', getAllWhy);
 
+// Routes for SerapanBiaya
+$routes.get('/serapan-biaya', getAllSerapanBiaya);
+$routes.get('/serapan-biaya/:id', getSerapanBiayaById);
+$routes.post('/serapan-biaya', createSerapanBiaya);
+$routes.put('/serapan-biaya/:id', updateSerapanBiaya);
+$routes.delete('/serapan-biaya/:id', deleteSerapanBiaya);
+
+$routes.get('/serapan-biaya-distinct-year', getDistinctTahunBulanSerapanBiaya);
+
+$routes.post('/serapan-biaya-kebun-where-bulan-tahun', getDistinctKebunSerapanBiayaWhereBulanTahun);
+
+
+$routes.get('/why', getAllWhy);
 
 $routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
-  
   try {
     await uploadBaseTBM.runTask(mappedData);
     res.status(200).json({
@@ -77,7 +101,6 @@ $routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
 
 $routes.post('/pi/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
-  
   try {
     await uploadPi.runTask(mappedData);
     res.status(200).json({
@@ -100,15 +123,38 @@ $routes.post('/vegetatif', createVegetatif);
 $routes.put('/vegetatif/:id', updateVegetatif);
 $routes.delete('/vegetatif/:id', deleteVegetatif);
 $routes.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
+
 $routes.get('/interpolate', getRulesOfStandarisasiVegetatif);
+
 $routes.post('/vegetatif-proc', callProcVegetatif);
+
 $routes.post('/get-kebun-where-reg-vegetatif', getKebunWhereRegVegetatif);
 $routes.post('/get-afd-where-kebun-vegetatif', getAfdWhereKebunVegetatif);
+
 $routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
   
   try {
     await uploadVegetatif.runTask(mappedData);
+    res.status(200).json({
+      status_code: 200,
+      message: 'Upload Data Selesai!',
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status_code: 500,
+      message: 'Upload Data Gagal!',
+    });
+  }
+});
+
+$routes.post('/serapan-biaya-upload', upload.single('file'), async (req, res) => {
+  let mappedData = req.body.mappedData || "[]";
+  
+  try {
+    await uploadSerapanBiaya.runTask(mappedData);
     res.status(200).json({
       status_code: 200,
       message: 'Upload Data Selesai!',
