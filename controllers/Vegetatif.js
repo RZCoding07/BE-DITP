@@ -28,6 +28,30 @@ export const getAllVegetatif = async (req, res) => {
     }
 };
 
+
+export const getVegetatifByBulanTahun = async (req, res) => {
+    try {
+        const { bulan, tahun } = req.params;
+
+        // Query ke database
+        const vegetatif = await Vegetatif.findAll({
+            where: {
+                bulan: bulan,
+                tahun: tahun
+            }
+        });
+
+        if (!vegetatif) return res.status(404).json({ message: "Record not found" });
+
+        res.status(200).json(vegetatif);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
 // Get a single Vegetatif record by ID with caching
 export const getVegetatifById = async (req, res) => {
     try {
@@ -307,10 +331,12 @@ export const callProcVegetatif = async (req, res) => {
         const {
             input_tbm,
             input_tahun_tanam,
+            input_bulan,
+            input_tahun
         } = req.body;
 
         // Generate cache key berdasarkan parameter
-        const cacheKey = `vegetatif:${input_tbm}:${input_tahun_tanam}`;
+        const cacheKey = `vegetatif:${input_tbm}:${input_tahun_tanam}:${input_bulan}:${input_tahun}`;
 
         // Cek apakah data sudah ada di cache
         const cachedData = cache.get(cacheKey);
@@ -324,12 +350,46 @@ export const callProcVegetatif = async (req, res) => {
 
         // Panggil prosedur jika data tidak ditemukan di cache
         const query = `
-        SELECT *
-        FROM GetFilterVegetatif($1::text, $2::integer)
-      `;
-      
+        SELECT 
+            vw_vegetatif.id,
+            vw_vegetatif.regional,
+            vw_vegetatif.kebun,
+            vw_vegetatif.afdeling,
+            vw_vegetatif.blok,
+            vw_vegetatif.tahun_tanam,
+            vw_vegetatif.varietas,
+            vw_vegetatif.luas_ha,
+            vw_vegetatif.jumlah_pokok_awal_tanam,
+            vw_vegetatif.jumlah_pokok_sekarang,
+            vw_vegetatif.tinggi_tanaman_cm,
+            vw_vegetatif.jumlah_pelepah_bh,
+            vw_vegetatif.panjang_rachis_cm,
+            vw_vegetatif.lebar_petiola_cm,
+            vw_vegetatif.tebal_petiola_cm,
+            vw_vegetatif.jad_1_sisi,
+            vw_vegetatif.rerata_panjang_anak_daun,
+            vw_vegetatif.rerata_lebar_anak_daun,
+            vw_vegetatif.lingkar_batang_cm,
+            vw_vegetatif.tahun,
+            vw_vegetatif.bulan,
+            vw_vegetatif.cal_jumlah_pelepah,
+            vw_vegetatif.cal_lingkar_batang,
+            vw_vegetatif.cal_tinggi_tanaman
+        FROM vw_vegetatif
+        WHERE 
+            (
+                'tbm4' = '${input_tbm}'
+                AND vw_vegetatif.tahun_tanam <= '${input_tahun_tanam}'  
+            )
+            OR 
+            (
+                'tbm4' <> '${input_tbm}' 
+                AND vw_vegetatif.tahun_tanam = '${input_tahun_tanam}'
+            )
+            AND vw_vegetatif.bulan = '${input_bulan}'
+            AND vw_vegetatif.tahun = '${input_tahun}';
+              `;
       const results = await db_app.query(query, {
-        bind: [input_tbm, input_tahun_tanam],
         type: db_app.QueryTypes.SELECT,
         });
         

@@ -21,7 +21,8 @@ import {
   getRulesOfStandarisasiVegetatif,
   getKebunWhereRegVegetatif,
   getAfdWhereKebunVegetatif,
-  callProcVegetatif
+  callProcVegetatif,
+  getVegetatifByBulanTahun
 } from '../controllers/Vegetatif.js';
 
 import {
@@ -30,7 +31,8 @@ import {
   createSerapanBiaya,
   updateSerapanBiaya,
   deleteSerapanBiaya,
-  getDistinctTahunBulanSerapanBiaya
+  getDistinctTahunBulanSerapanBiaya,
+  getSerapanBiayaByBulanTahun
 } from '../controllers/SerapanBiaya.js';
 
 import { getAllWhy } from "../controllers/Why.js";
@@ -73,6 +75,8 @@ $routes.get('/serapan-biaya/:id', getSerapanBiayaById);
 $routes.post('/serapan-biaya', createSerapanBiaya);
 $routes.put('/serapan-biaya/:id', updateSerapanBiaya);
 $routes.delete('/serapan-biaya/:id', deleteSerapanBiaya);
+
+$routes.post('/serapan-biaya-bulan-tahun', getSerapanBiayaByBulanTahun);
 
 $routes.get('/serapan-biaya-distinct-year', getDistinctTahunBulanSerapanBiaya);
 
@@ -120,6 +124,10 @@ $routes.post('/vegetatif', createVegetatif);
 $routes.put('/vegetatif/:id', updateVegetatif);
 $routes.delete('/vegetatif/:id', deleteVegetatif);
 $routes.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
+$routes.get('/distinct-year-serapan-biaya', getDistinctTahunBulanSerapanBiaya);
+
+$routes.get('/vegetatif-bulan-tahun/:bulan/:tahun', getVegetatifByBulanTahun);
+
 
 $routes.get('/interpolate', getRulesOfStandarisasiVegetatif);
 

@@ -1,4 +1,6 @@
 import SerapanBiaya from "../models/SerapanBiayaModel.js";
+import { db_app } from "../config/Database.js";
+import sequelize from "sequelize";
 
 // Get all SerapanBiaya records
 export const getAllSerapanBiaya = async (req, res) => {
@@ -20,6 +22,81 @@ export const getSerapanBiayaById = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const getSerapanBiayaByBulanTahun = async (req, res) => {
+    try {
+        const bulan = req.body.bulan;
+        const tahun = req.body.tahun;
+
+        // Mengambil data dan mengelompokkan per kebun
+        const serapanBiaya = await SerapanBiaya.findAll({
+            where: {
+                bulan: bulan,
+                tahun: tahun
+            },
+            attributes: [
+                'kebun',
+                [sequelize.fn('SUM', sequelize.col('real_sd')), 'total_real_sd'],
+                [sequelize.fn('SUM', sequelize.col('rkap_sd')), 'total_rkap_sd'],
+                [sequelize.fn('SUM', sequelize.col('luas')), 'total_luas'],
+                [sequelize.fn('SUM', sequelize.col('rp_ha')), 'total_rp_ha']
+            ],
+            group: ['kebun']
+        });
+
+        if (!serapanBiaya || serapanBiaya.length === 0) {
+            return res.status(404).json({ message: "Record not found" });
+        }
+
+        // Menghitung persen_serapan untuk setiap kebun
+        const rekapSerapan = serapanBiaya.map(item => {
+            const totalRealSd = parseFloat(item.dataValues.total_real_sd);
+            const totalRkapSd = parseFloat(item.dataValues.total_rkap_sd);
+
+            // Menghitung persen_serapan
+            const persenSerapan = totalRkapSd !== 0 ? (totalRealSd / totalRkapSd) * 100 : 0;
+
+            return {
+                kebun: item.dataValues.kebun,
+                total_real_sd: totalRealSd,
+                total_rkap_sd: totalRkapSd,
+                persen_serapan: persenSerapan.toFixed(2), // Membulatkan ke 2 desimal
+                total_luas: parseFloat(item.dataValues.total_luas),
+                total_rp_ha: parseFloat(item.dataValues.total_rp_ha)
+            };
+        });
+
+        rekapSerapan.sort((a, b) => a.kebun.localeCompare(b.kebun));
+
+        res.status(200).json({
+            data: rekapSerapan
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+export const getDistinctTahunBulanSerapanbiaya = async (req, res) => {
+    try {
+        // Query SQL untuk mengambil data distinct tahun dan bulan
+        const sqlQuery = "SELECT DISTINCT tahun, bulan FROM serapan_biaya";
+
+        // Execute the query
+        const distinctTahunBulan = await db_app.query(sqlQuery, {
+            type: db_app.QueryTypes.SELECT,
+        });
+
+        // Kirim data sebagai response
+        return res.status(200).json(distinctTahunBulan);
+    } catch (error) {
+        console.error("Error fetching distinct tahun and bulan:", error);
+        return res.status(500).json({
+            message: "Failed to fetch data. Please try again later.",
+        });
+    }
+};
+
 
 // Create a new SerapanBiaya record
 export const createSerapanBiaya = async (req, res) => {
