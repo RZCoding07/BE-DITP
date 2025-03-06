@@ -62,8 +62,10 @@ export const getSerapanBiayaByBulanTahun = async (req, res) => {
                 total_rkap_sd: totalRkapSd,
                 persen_serapan: persenSerapan.toFixed(2), // Membulatkan ke 2 desimal
                 total_luas: parseFloat(item.dataValues.total_luas),
-                total_rp_ha: parseFloat(item.dataValues.total_rp_ha)
-            };
+                total_rp_ha: parseFloat(item.dataValues.total_rp_ha),
+                bulan: bulan,
+                tahun: tahun
+                        };
         });
 
         rekapSerapan.sort((a, b) => a.kebun.localeCompare(b.kebun));

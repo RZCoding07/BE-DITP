@@ -84,6 +84,7 @@ $routes.get('/why', getAllWhy);
 
 $routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
+  console.log(mappedData.length);
   try {
     await uploadBaseTBM.runTask(mappedData);
     res.status(200).json({
