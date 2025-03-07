@@ -83,7 +83,12 @@ const Vegetatif = db_app.define('vegetatif', {
   bulan: {
     type: DataTypes.TEXT,
     allowNull: false
-  }
+  },
+  bulan_tanam: {
+    type: DataTypes.TEXT,
+    defaultValue: '12',
+    allowNull: false
+  },
 
 }, { freezeTableName: true });
 

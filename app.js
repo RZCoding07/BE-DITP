@@ -9,7 +9,9 @@ import { db_app } from './config/Database.js';
 import $routes from './routes/index.js';
 import { rateLimit } from 'express-rate-limit'
 import compression from "compression";
-import SerapanBiaya from './models/SerapanBiayaModel.js';
+// import SerapanBiaya from './models/SerapanBiayaModel.js';
+import Ca from './models/CaModel.js';
+// import Vegetatif from './models/VegetatifModel.js';
 dotenv.config();
 
 const app = express();
@@ -29,7 +31,7 @@ app.use(morgan('dev'));
 const initializeDatabase = async () => {
     try {
         await db_app.authenticate(); // Test connection
-        // await SerapanBiaya.sync({ alter: true }); // Sync model with database
+        // await Ca.sync({ alter: true }); // Sync model with database 
         console.log('Connection has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
