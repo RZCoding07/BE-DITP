@@ -1,23 +1,19 @@
 import { Sequelize, json } from "sequelize";
-import { db_app } from "../config/Database.js";
+import { db_app } from "../../config/Database.js";
 
 const DataTypes = Sequelize;
 
-const W = db_app.define('pi', {
+const Ca = db_app.define('ca', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    w1: {
-        type: DataTypes.JSON,
-        allowNull: true,
-    },
-    w2: {
+    w3: {
         type: DataTypes.JSON,
         allowNull: true
     },
-    w3: {
+    ca: {
         type: DataTypes.JSON,
         allowNull: true
     },
@@ -27,4 +23,4 @@ const W = db_app.define('pi', {
     }
 }, { freezeTableName: true });
 
-export default W;
+export default Ca

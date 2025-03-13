@@ -1,4 +1,4 @@
-import BaseTBM from '../models/BaseTBMModel.js';
+import BaseTBM from '../../models/immature/BaseTBMModel.js';
 
 // Get all BaseTBM records
 export const getAllBaseTBM = async (req, res) => {

@@ -1,5 +1,5 @@
-import SerapanBiaya from "../models/SerapanBiayaModel.js";
-import { db_app } from "../config/Database.js";
+import SerapanBiaya from "../../models/immature/SerapanBiayaModel.js";
+import { db_app } from "../../config/Database.js";
 import sequelize from "sequelize";
 
 // Get all SerapanBiaya records

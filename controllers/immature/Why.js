@@ -1,4 +1,4 @@
-import { db_app } from '../config/Database.js';
+import { db_app } from '../../config/Database.js';
 import NodeCache from 'node-cache';
 
 

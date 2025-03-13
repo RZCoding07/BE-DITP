@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize";
-import { db_app } from "../config/Database.js"; const DataTypes = Sequelize;
+import { db_app } from "../../config/Database.js"; const DataTypes = Sequelize;
 
 
 const Vegetatif = db_app.define('vegetatif', {

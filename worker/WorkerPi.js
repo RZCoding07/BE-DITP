@@ -1,5 +1,5 @@
 import { parentPort } from 'worker_threads';
-import W from '../models/PiModel.js';
+import W from '../models/immature/PiModel.js';
 import { db_app } from '../config/Database.js'; // Adjust the path to your Sequelize instance
 
 async function handleDataBatch(data) {

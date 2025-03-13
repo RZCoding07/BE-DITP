@@ -1,5 +1,5 @@
-import Vegetatif from '../models/VegetatifModel.js';
-import { db_app } from '../config/Database.js';
+import Vegetatif from '../../models/immature/VegetatifModel.js';
+import { db_app } from '../../config/Database.js';
 import NodeCache from 'node-cache';
 import zlib from 'zlib';
 

@@ -1,5 +1,5 @@
 import { parentPort } from 'worker_threads';
-import BaseTBM from '../models/BaseTBMModel.js';
+import BaseTBM from '../models/immature/BaseTBMModel.js';
 import {db_app} from '../config/Database.js'; // Adjust the path to your Sequelize instance
 
 async function handleDataBatch(data) {

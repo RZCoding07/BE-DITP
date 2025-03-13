@@ -1,5 +1,5 @@
 import { parentPort } from 'worker_threads';
-import Vegetatif from '../models/VegetatifModel.js';
+import Vegetatif from '../models/immature/VegetatifModel.js';
 import {db_app} from '../config/Database.js'; // Adjust the path to your Sequelize instance
 
 async function handleDataBatch(data) {
