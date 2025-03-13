@@ -9,7 +9,7 @@ import {
   createBaseTBM,
   updateBaseTBM,
   deleteBaseTBM
-} from '../controllers/BaseTBM.js';
+} from '../controllers/immature/BaseTBM.js';
 
 import {
   getAllVegetatif,
@@ -23,7 +23,7 @@ import {
   getAfdWhereKebunVegetatif,
   callProcVegetatif,
   getVegetatifByBulanTahun
-} from '../controllers/Vegetatif.js';
+} from '../controllers/immature/Vegetatif.js';
 
 import {
   getAllSerapanBiaya,
@@ -33,9 +33,9 @@ import {
   deleteSerapanBiaya,
   getDistinctTahunBulanSerapanBiaya,
   getSerapanBiayaByBulanTahun
-} from '../controllers/SerapanBiaya.js';
+} from '../controllers/immature/SerapanBiaya.js';
 
-import { getAllWhy } from "../controllers/Why.js";
+import { getAllWhy } from "../controllers/immature/Why.js";
 
 const $routes = express.Router();
 
