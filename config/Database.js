@@ -40,7 +40,6 @@ export const db_master = new Sequelize(
   }
 );
 
-
 export const db_immature = new Sequelize(
   process.env.IMMATURE_DB_NAME,
   process.env.IMMATURE_DB_USER,
@@ -52,3 +51,41 @@ export const db_immature = new Sequelize(
     dialectModule: mysql2,
   }
 );
+
+export const db_monica = new Sequelize(
+  process.env.MONICA_DB_NAME,
+  process.env.MONICA_DB_USER,
+  process.env.MONICA_DB_PASSWORD,
+  {
+    host: process.env.MONICA_DB_HOST,
+    port: process.env.MONICA_DB_PORT,
+    dialect: process.env.MONICA_DB_DIALECT,
+    dialectModule: mysql2,
+  }
+);
+
+export const db_replanting = new Sequelize(
+  process.env.REPLANTING_DB_NAME,
+  process.env.REPLANTING_DB_USER,
+  process.env.REPLANTING_DB_PASSWORD,
+  {
+    host: process.env.REPLANTING_DB_HOST,
+    port: process.env.REPLANTING_DB_PORT,
+    dialect: process.env.REPLANTING_DB_DIALECT,
+    dialectModule: mysql2,
+  }
+);
+
+export const db_nursery = new Sequelize(
+  process.env.NURSERY_DB_NAME,
+  process.env.NURSERY_DB_USER,
+  process.env.NURSERY_DB_PASSWORD,
+  {
+    host: process.env.NURSERY_DB_HOST,
+    port: process.env.NURSERY_DB_PORT,
+    dialect: process.env.NURSERY_DB_DIALECT,
+    dialectModule: mysql2,
+  }
+);
+
+
