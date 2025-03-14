@@ -5,10 +5,17 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import { db_app } from './config/Database.js';
+import { db_immature } from './config/Database.js';
 import $routes from './routes/index.js';
 import { rateLimit } from 'express-rate-limit'
 import compression from "compression";
+
+import BaseTBM from './models/immature/BaseTBMModel.js';
+import Ca from './models/immature/CaModel.js';
+import Vegetatif from './models/immature/VegetatifModel.js';
+import SerapanBiaya from './models/immature/SerapanBiayaModel.js';
+import W from './models/immature/PiModel.js';
+
 dotenv.config();
 
 const app = express();
@@ -27,7 +34,8 @@ app.use(morgan('dev'));
 
 const initializeDatabase = async () => {
     try {
-        await db_app.authenticate(); // Test connection
+        await db_immature.authenticate(); // Test connection\
+        await db_immature.sync(); // Sync all models
         console.log('Connection has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);

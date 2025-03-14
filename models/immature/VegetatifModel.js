@@ -1,8 +1,8 @@
 import { Sequelize } from "sequelize";
-import { db_app } from "../../config/Database.js"; const DataTypes = Sequelize;
+import { db_immature } from "../../config/Database.js"; const DataTypes = Sequelize;
 
 
-const Vegetatif = db_app.define('vegetatif', {
+const Vegetatif = db_immature.define('vegetatif', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
   regional: {
     type: DataTypes.TEXT,

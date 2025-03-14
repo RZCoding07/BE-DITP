@@ -1,5 +1,5 @@
 import Vegetatif from '../../models/immature/VegetatifModel.js';
-import { db_app } from '../../config/Database.js';
+import { db_immature } from '../../config/Database.js';
 import NodeCache from 'node-cache';
 import zlib from 'zlib';
 
@@ -135,8 +135,8 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
         const sqlQuery = "SELECT DISTINCT tahun, bulan FROM vegetatif";
 
         // Execute the query
-        const distinctTahunBulan = await db_app.query(sqlQuery, {
-            type: db_app.QueryTypes.SELECT,
+        const distinctTahunBulan = await db_immature.query(sqlQuery, {
+            type: db_immature.QueryTypes.SELECT,
         });
 
         // Kirim data sebagai response
@@ -164,9 +164,9 @@ export const getKebunWhereRegVegetatif = async (req, res) => {
         const sqlQuery = "SELECT DISTINCT kebun FROM vegetatif WHERE regional = :regional ORDER BY kebun ASC";
 
         // Execute the query
-        const distinctKebun = await db_app.query(sqlQuery, {
+        const distinctKebun = await db_immature.query(sqlQuery, {
             replacements: { regional: req.body.rpc },
-            type: db_app.QueryTypes.SELECT,
+            type: db_immature.QueryTypes.SELECT,
         });
 
         // Simpan hasil query ke cache
@@ -195,9 +195,9 @@ export const getAfdWhereKebunVegetatif = async (req, res) => {
         const sqlQuery = "SELECT DISTINCT afdeling FROM vegetatif WHERE regional = :regional AND kebun = :kebun ORDER BY afdeling ASC";
 
         // Execute the query
-        const distinctAfd = await db_app.query(sqlQuery, {
+        const distinctAfd = await db_immature.query(sqlQuery, {
             replacements: { regional: req.body.rpc, kebun: req.body.kebun },
-            type: db_app.QueryTypes.SELECT,
+            type: db_immature.QueryTypes.SELECT,
         });
 
         // Simpan hasil query ke cache
@@ -389,8 +389,8 @@ export const callProcVegetatif = async (req, res) => {
             AND vw_vegetatif.bulan = '${input_bulan}'
             AND vw_vegetatif.tahun = '${input_tahun}';
               `;
-      const results = await db_app.query(query, {
-        type: db_app.QueryTypes.SELECT,
+      const results = await db_immature.query(query, {
+        type: db_immature.QueryTypes.SELECT,
         });
         
         // Simpan hasil ke cache

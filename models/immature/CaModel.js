@@ -1,9 +1,9 @@
 import { Sequelize, json } from "sequelize";
-import { db_app } from "../../config/Database.js";
+import { db_immature } from "../../config/Database.js";
 
 const DataTypes = Sequelize;
 
-const Ca = db_app.define('ca', {
+const Ca = db_immature.define('ca', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,

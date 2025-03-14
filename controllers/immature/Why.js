@@ -1,4 +1,4 @@
-import { db_app } from '../../config/Database.js';
+import { db_immature } from '../../config/Database.js';
 import NodeCache from 'node-cache';
 
 
@@ -14,7 +14,7 @@ export const getAllWhy = async (req, res) => {
         }
 
         // Ambil data dari database jika tidak ada di cache
-        const why = await db_app.query('SELECT * FROM vw_pi', { type: db_app.QueryTypes.SELECT });
+        const why = await db_immature.query('SELECT * FROM vw_pi', { type: db_immature.QueryTypes.SELECT });
 
 
     

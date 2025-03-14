@@ -1,5 +1,5 @@
 import SerapanBiaya from "../../models/immature/SerapanBiayaModel.js";
-import { db_app } from "../../config/Database.js";
+import { db_immature } from "../../config/Database.js";
 import sequelize from "sequelize";
 
 // Get all SerapanBiaya records
@@ -85,8 +85,8 @@ export const getDistinctTahunBulanSerapanbiaya = async (req, res) => {
         const sqlQuery = "SELECT DISTINCT tahun, bulan FROM serapan_biaya";
 
         // Execute the query
-        const distinctTahunBulan = await db_app.query(sqlQuery, {
-            type: db_app.QueryTypes.SELECT,
+        const distinctTahunBulan = await db_immature.query(sqlQuery, {
+            type: db_immature.QueryTypes.SELECT,
         });
 
         // Kirim data sebagai response

@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
-import { db_app } from "../../config/Database.js";const DataTypes = Sequelize;
+import { db_immature } from "../../config/Database.js";const DataTypes = Sequelize;
 
-const BaseTBM = db_app.define('base_tbm', {
+const BaseTBM = db_immature.define('base_tbm', {
    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
     regional: {
         type: DataTypes.STRING,
