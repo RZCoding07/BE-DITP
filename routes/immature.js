@@ -37,7 +37,7 @@ import {
 
 import { getAllWhy } from "../controllers/immature/Why.js";
 
-const $routes = express.Router();
+const routerImmature = express.Router();
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -63,26 +63,26 @@ const uploadSerapanBiaya = new Piscina({
 });
 
 // Routes for BaseTBM
-$routes.get('/base-tbm', getAllBaseTBM);
-$routes.get('/base-tbm/:id', getBaseTBMById);
-$routes.post('/base-tbm', createBaseTBM);
-$routes.put('/base-tbm/:id', updateBaseTBM);
-$routes.delete('/base-tbm/:id', deleteBaseTBM);
+routerImmature.get('/base-tbm', getAllBaseTBM);
+routerImmature.get('/base-tbm/:id', getBaseTBMById);
+routerImmature.post('/base-tbm', createBaseTBM);
+routerImmature.put('/base-tbm/:id', updateBaseTBM);
+routerImmature.delete('/base-tbm/:id', deleteBaseTBM);
 
 // Routes for SerapanBiaya
-$routes.get('/serapan-biaya', getAllSerapanBiaya);
-$routes.get('/serapan-biaya/:id', getSerapanBiayaById);
-$routes.post('/serapan-biaya', createSerapanBiaya);
-$routes.put('/serapan-biaya/:id', updateSerapanBiaya);
-$routes.delete('/serapan-biaya/:id', deleteSerapanBiaya);
+routerImmature.get('/serapan-biaya', getAllSerapanBiaya);
+routerImmature.get('/serapan-biaya/:id', getSerapanBiayaById);
+routerImmature.post('/serapan-biaya', createSerapanBiaya);
+routerImmature.put('/serapan-biaya/:id', updateSerapanBiaya);
+routerImmature.delete('/serapan-biaya/:id', deleteSerapanBiaya);
 
-$routes.post('/serapan-biaya-bulan-tahun', getSerapanBiayaByBulanTahun);
+routerImmature.post('/serapan-biaya-bulan-tahun', getSerapanBiayaByBulanTahun);
 
-$routes.get('/serapan-biaya-distinct-year', getDistinctTahunBulanSerapanBiaya);
+routerImmature.get('/serapan-biaya-distinct-year', getDistinctTahunBulanSerapanBiaya);
 
-$routes.get('/why', getAllWhy);
+routerImmature.get('/why', getAllWhy);
 
-$routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
+routerImmature.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
   console.log(mappedData.length);
   try {
@@ -101,7 +101,7 @@ $routes.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-$routes.post('/pi/upload', upload.single('file'), async (req, res) => {
+routerImmature.post('/pi/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
   try {
     await uploadPi.runTask(mappedData);
@@ -119,25 +119,25 @@ $routes.post('/pi/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-$routes.get('/vegetatif', getAllVegetatif);
-$routes.get('/vegetatif/:id', getVegetatifById);
-$routes.post('/vegetatif', createVegetatif);
-$routes.put('/vegetatif/:id', updateVegetatif);
-$routes.delete('/vegetatif/:id', deleteVegetatif);
-$routes.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
-$routes.get('/distinct-year-serapan-biaya', getDistinctTahunBulanSerapanBiaya);
+routerImmature.get('/vegetatif', getAllVegetatif);
+routerImmature.get('/vegetatif/:id', getVegetatifById);
+routerImmature.post('/vegetatif', createVegetatif);
+routerImmature.put('/vegetatif/:id', updateVegetatif);
+routerImmature.delete('/vegetatif/:id', deleteVegetatif);
+routerImmature.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
+routerImmature.get('/distinct-year-serapan-biaya', getDistinctTahunBulanSerapanBiaya);
 
-$routes.get('/vegetatif-bulan-tahun/:bulan/:tahun', getVegetatifByBulanTahun);
+routerImmature.get('/vegetatif-bulan-tahun/:bulan/:tahun', getVegetatifByBulanTahun);
 
 
-$routes.get('/interpolate', getRulesOfStandarisasiVegetatif);
+routerImmature.get('/interpolate', getRulesOfStandarisasiVegetatif);
 
-$routes.post('/vegetatif-proc', callProcVegetatif);
+routerImmature.post('/vegetatif-proc', callProcVegetatif);
 
-$routes.post('/get-kebun-where-reg-vegetatif', getKebunWhereRegVegetatif);
-$routes.post('/get-afd-where-kebun-vegetatif', getAfdWhereKebunVegetatif);
+routerImmature.post('/get-kebun-where-reg-vegetatif', getKebunWhereRegVegetatif);
+routerImmature.post('/get-afd-where-kebun-vegetatif', getAfdWhereKebunVegetatif);
 
-$routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
+routerImmature.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
   
   try {
@@ -156,7 +156,7 @@ $routes.post('/vegetatif/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-$routes.post('/serapan-biaya-upload', upload.single('file'), async (req, res) => {
+routerImmature.post('/serapan-biaya-upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
   
   try {
@@ -175,4 +175,4 @@ $routes.post('/serapan-biaya-upload', upload.single('file'), async (req, res) =>
   }
 });
 
-export default $routes;
+export default routerImmature;

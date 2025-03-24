@@ -1,9 +1,9 @@
 import { Sequelize } from "sequelize";
-import {db_immature} from "../config/Database.js";
+import {db_master} from "../../config/Database.js";
 
 const DataTypes = Sequelize;
 
-const Users = db_immature.define('users', {
+const Users = db_master.define('users', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,

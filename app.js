@@ -5,16 +5,20 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import { db_immature } from './config/Database.js';
-import $routes from './routes/index.js';
+import { db_immature, db_master, db_nursery, db_replanting } from './config/Database.js';
+import routerImmature from './routes/immature.js';
+import routerMaster from './routes/master.js';
 import { rateLimit } from 'express-rate-limit'
 import compression from "compression";
 
-import BaseTBM from './models/immature/BaseTBMModel.js';
-import Ca from './models/immature/CaModel.js';
-import Vegetatif from './models/immature/VegetatifModel.js';
-import SerapanBiaya from './models/immature/SerapanBiayaModel.js';
-import W from './models/immature/PiModel.js';
+// import BaseTBM from './models/immature/BaseTBMModel.js';
+// import Ca from './models/immature/CaModel.js';
+// import Vegetatif from './models/immature/VegetatifModel.js';
+// import SerapanBiaya from './models/immature/SerapanBiayaModel.js';
+// import W from './models/immature/PiModel.js';
+
+
+// import Users from './models/master/UserModel.js';
 
 dotenv.config();
 
@@ -32,22 +36,58 @@ app.use(bodyParser.json({ limit: '50mb' }));  // Increase the limit as needed
 app.use(helmet());  // Security middleware
 app.use(morgan('dev'));
 
-const initializeDatabase = async () => {
+const initializeDatabaseMaster = async () => {
     try {
-        await db_immature.authenticate(); // Test connection\
-        await db_immature.sync(); // Sync all models
-        console.log('Connection has been established successfully.');
+        await db_master.authenticate(); // Test connection
+        // await db_master.sync(); // Sync all models
+        console.log('Connection master has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }
 }
 
-initializeDatabase();
+const initializeDatabaseImmature = async () => {
+    try {
+        await db_immature.authenticate(); // Test connection\
+        // await db_immature.sync(); // Sync all models
+        console.log('Connection immature has been established successfully.');
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+}
+
+const initializeDatabaseReplanting = async () => {
+    try {
+        await db_replanting.authenticate(); // Test connection\
+        // await db_immature.sync(); // Sync all models
+        console.log('Connection replanting has been established successfully.');
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+}
+
+const initializeDatabaseNursery = async () => {
+    try {
+        await db_nursery.authenticate(); // Test connection\
+        // await db_immature.sync(); // Sync all models
+        console.log('Connection nursery has been established successfully.');
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+}
+
+initializeDatabaseMaster();
+initializeDatabaseImmature();
+initializeDatabaseReplanting();
+initializeDatabaseNursery();
+
+
 
 app.use(express.json());  // Parse JSON bodies
 app.use(express.urlencoded({ extended: true }));  // Parse URL-encoded bodies
 app.use(cookieParser());  // Parse Cookie header and populate req.cookies
-app.use($routes);
+app.use('/api-immature', routerImmature);
+app.use('/api-master', routerMaster);
 
 app.use((err, req, res, next) => {
     console.error('Error occurred:', err);

@@ -9,6 +9,15 @@ const Ca = db_immature.define('ca', {
         autoIncrement: true,
         primaryKey: true
     },
+
+    w1: {
+        type: DataTypes.JSON,
+        allowNull: true
+    },
+    w2: {
+        type: DataTypes.JSON,
+        allowNull: true
+    },
     w3: {
         type: DataTypes.JSON,
         allowNull: true
