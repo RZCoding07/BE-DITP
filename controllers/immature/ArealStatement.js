@@ -160,9 +160,22 @@ export const getAllArealTbm = async (req, res) => {
         
         // Build the query with dynamic WHERE conditions
         let query = `
-          SELECT * FROM vw_areal 
-          WHERE tahun = :tahun AND luasan != 0
-        `;
+  SELECT 
+    kode_kebun, 
+    calculated_tbm, 
+    SUM(luasan) as total_luasan
+FROM 
+    vw_areal
+WHERE 
+    tahun = :tahun 
+    AND luasan != 0
+GROUP BY 
+    kode_kebun, calculated_tbm
+ORDER BY 
+    kode_kebun, calculated_tbm
+
+
+          `;
         
         // Add additional filters if provided
         const replacements = { tahun };
@@ -200,8 +213,21 @@ export const getAllArealTbmMaster = async (req, res) => {
         
         // Build the query with dynamic WHERE conditions
         let query = `
-          SELECT * FROM vw_areal 
-          WHERE tahun = :tahun AND luasan != 0 AND rpc = :rpc AND kode_kebun = :kebun
+SELECT 
+    kode_kebun,
+    calculated_tbm,
+    SUM(luasan) AS total_luasan
+FROM 
+    vw_areal
+WHERE 
+    tahun = :tahun 
+    AND luasan != 0 
+    AND rpc = :rpc 
+    AND kode_kebun = :kebun
+GROUP BY 
+    kode_kebun, calculated_tbm
+ORDER BY 
+    kode_kebun, calculated_tbm
         `;
         
         // Add replacements for the query parameters

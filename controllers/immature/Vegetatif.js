@@ -530,7 +530,7 @@ export const getAllVegetatifProgress = async (req, res) => {
 
         // Query ke database untuk mendapatkan data vegetatif berdasarkan bulan dan tahun
         const vegetatif = await db_immature.query(
-            `SELECT * FROM get_vegetatif_progress WHERE tahun = :tahun`,
+            `SELECT * FROM vw_vegetatif_progress WHERE tahun = :tahun`,
             {
                 replacements: { tahun },
                 type: db_immature.QueryTypes.SELECT,
