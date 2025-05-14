@@ -60,10 +60,6 @@ const Vegetatif = db_immature.define('vegetatif', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  jad_1_sisi: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
   rerata_panjang_anak_daun: {
     type: DataTypes.TEXT,
     allowNull: false,
@@ -89,7 +85,46 @@ const Vegetatif = db_immature.define('vegetatif', {
     defaultValue: '12',
     allowNull: false
   },
-
+  fase_tbm: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  umur_saat_ini_bulan: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  pkk_ha_awal_tanam: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  pkk_ha_saat_ini: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  jumlah_anak_daun: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  jumlah_pokok_sampel: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  tanggal_pengamatan: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  status: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  approval: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  user_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, { freezeTableName: true });
 
 export default Vegetatif;

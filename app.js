@@ -10,15 +10,7 @@ import routerImmature from './routes/immature.js';
 import routerMaster from './routes/master.js';
 import { rateLimit } from 'express-rate-limit'
 import compression from "compression";
-
-// import BaseTBM from './models/immature/BaseTBMModel.js';
-// import Ca from './models/immature/CaModel.js';
-// import Vegetatif from './models/immature/VegetatifModel.js';
-// import SerapanBiaya from './models/immature/SerapanBiayaModel.js';
-// import W from './models/immature/PiModel.js';
-
-
-// import Users from './models/master/UserModel.js';
+import Areal from './models/immature/ASModel.js';
 
 dotenv.config();
 
@@ -39,7 +31,6 @@ app.use(morgan('dev'));
 const initializeDatabaseMaster = async () => {
     try {
         await db_master.authenticate(); // Test connection
-        // await db_master.sync(); // Sync all models
         console.log('Connection master has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
@@ -49,7 +40,6 @@ const initializeDatabaseMaster = async () => {
 const initializeDatabaseImmature = async () => {
     try {
         await db_immature.authenticate(); // Test connection\
-        // await db_immature.sync(); // Sync all models
         console.log('Connection immature has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
@@ -59,7 +49,6 @@ const initializeDatabaseImmature = async () => {
 const initializeDatabaseReplanting = async () => {
     try {
         await db_replanting.authenticate(); // Test connection\
-        // await db_immature.sync(); // Sync all models
         console.log('Connection replanting has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
@@ -69,7 +58,6 @@ const initializeDatabaseReplanting = async () => {
 const initializeDatabaseNursery = async () => {
     try {
         await db_nursery.authenticate(); // Test connection\
-        // await db_immature.sync(); // Sync all models
         console.log('Connection nursery has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);

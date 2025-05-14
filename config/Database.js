@@ -1,27 +1,3 @@
-// import pg from 'pg';
-// import postgres from 'postgres';  
-// import { Sequelize } from 'sequelize';
-// import dotenv from 'dotenv';
-// dotenv.config();
-
-// const connectionString = process.env.DATABASE_URL;
-
-// const sql = postgres(connectionString);
-
-// const db_immature = new Sequelize(connectionString, {
-//   logging: false,
-//   protocol: 'postgres',
-//   dialectModule: pg,
-//   dialectOptions: {
-//     ssl: {
-//       require: true,
-//       rejectUnauthorized: false
-//     }
-//   }
-// });
-
-// export { sql, db_immature };
-
 import { Sequelize } from 'sequelize';
 import mysql2 from 'mysql2';
 import dotenv from 'dotenv';
@@ -49,6 +25,7 @@ export const db_immature = new Sequelize(
     port: process.env.IMMATURE_DB_PORT,
     dialect: process.env.IMMATURE_DB_DIALECT,
     dialectModule: mysql2,
+    timezone: '+07:00', // Untuk WIB (UTC+7)
   }
 );
 

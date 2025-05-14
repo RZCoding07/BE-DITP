@@ -22,7 +22,11 @@ import {
   getKebunWhereRegVegetatif,
   getAfdWhereKebunVegetatif,
   callProcVegetatif,
-  getVegetatifByBulanTahun
+  getVegetatifByBulanTahun,
+  getVwVegetatifById,
+  getDistinctBulanVegetatif,
+  bulkDeleteVegetatif,
+  getAllVegetatifProgress
 } from '../controllers/immature/Vegetatif.js';
 
 import {
@@ -35,7 +39,12 @@ import {
   getSerapanBiayaByBulanTahun
 } from '../controllers/immature/SerapanBiaya.js';
 
-import { getAllWhy } from "../controllers/immature/Why.js";
+import { createPi, deletePiById, getAllWhy, getPiById, updatePiById } from "../controllers/immature/Why.js";
+import { getAllCa } from "../controllers/immature/CorrectiveAction.js";
+import PiCa from "../models/immature/PiCaModel.js";
+import CaImage from "../models/immature/CaImageModel.js";
+import { getAllPiCa, picaw3Count, submitPiCa } from "../controllers/immature/PICA.js";
+import { getAllAreal, getAllArealTbm, getAllArealTbmMaster, getAllKebunVegetatifAreal, getAllKebunVegetatifArealTbm, vwCalculateAreal } from "../controllers/immature/ArealStatement.js";
 
 const routerImmature = express.Router();
 
@@ -54,8 +63,16 @@ const uploadVegetatif = new Piscina({
   filename: path.resolve(__dirname, '../worker/WorkerVegetatif.js')
 });
 
+const uploadAS = new Piscina({
+  filename: path.resolve(__dirname, '../worker/WorkerAs.js')
+});
+
 const uploadPi = new Piscina({
   filename: path.resolve(__dirname, '../worker/WorkerPi.js')
+});
+
+const uploadCa = new Piscina({
+  filename: path.resolve(__dirname, '../worker/WorkerCa.js')
 });
 
 const uploadSerapanBiaya = new Piscina({
@@ -81,6 +98,41 @@ routerImmature.post('/serapan-biaya-bulan-tahun', getSerapanBiayaByBulanTahun);
 routerImmature.get('/serapan-biaya-distinct-year', getDistinctTahunBulanSerapanBiaya);
 
 routerImmature.get('/why', getAllWhy);
+routerImmature.post('/why', createPi);
+routerImmature.delete('/why/:id', deletePiById);
+routerImmature.get('/why/:id', getPiById);
+routerImmature.put('/why/:id', updatePiById);
+
+routerImmature.get('/ca', getAllCa);
+
+routerImmature.post('/areal-tbm-rpc-kebun', getAllArealTbm);
+routerImmature.post('/areal-tbm-master', getAllArealTbmMaster);
+
+routerImmature.post('/get-rpc-kebun-veg-areal', getAllKebunVegetatifAreal);
+routerImmature.post('/get-rpc-kebun-veg-areal-tbm', getAllKebunVegetatifArealTbm);
+routerImmature.get('/get-pica-w3-count', picaw3Count);
+routerImmature.get('/get-vegetatif-progress/:tahun', getAllVegetatifProgress);
+
+routerImmature.post('/vw-areal-calculate', vwCalculateAreal);
+
+routerImmature.post('/areal/upload', upload.single('file'), async (req, res) => {
+  let mappedData = req.body.mappedData || "[]";
+  try {
+    await uploadAS.runTask(mappedData);
+    res.status(200).json({
+      status_code: 200,
+      message: 'Upload Data Selesai!',
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status_code: 500,
+      message: 'Upload Data Gagal!',
+    });
+  }
+});
+
 
 routerImmature.post('/base-tbm/upload', upload.single('file'), async (req, res) => {
   let mappedData = req.body.mappedData || "[]";
@@ -119,18 +171,44 @@ routerImmature.post('/pi/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-routerImmature.get('/vegetatif', getAllVegetatif);
+routerImmature.post('/ca/upload', upload.single('file'), async (req, res) => {
+  let mappedData = req.body.mappedData || "[]";
+  try {
+    await uploadCa.runTask(mappedData);
+    res.status(200).json({
+      status_code: 200,
+      message: 'Upload Data Selesai!',
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status_code: 500,
+      message: 'Upload Data Gagal!',
+    });
+  }
+});
+
+routerImmature.get('/luas-areal-statement', getAllAreal);
+routerImmature.post('/vegetatif', getAllVegetatif);
+routerImmature.post('/get-vw-vegetatif', getVwVegetatifById);
 routerImmature.get('/vegetatif/:id', getVegetatifById);
 routerImmature.post('/vegetatif', createVegetatif);
 routerImmature.put('/vegetatif/:id', updateVegetatif);
 routerImmature.delete('/vegetatif/:id', deleteVegetatif);
+routerImmature.post('/vegetatif/bulk', bulkDeleteVegetatif);
 routerImmature.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
+routerImmature.post('/vegetatif-distinct-month', getDistinctBulanVegetatif);
 routerImmature.get('/distinct-year-serapan-biaya', getDistinctTahunBulanSerapanBiaya);
 
 routerImmature.get('/vegetatif-bulan-tahun/:bulan/:tahun', getVegetatifByBulanTahun);
 
 
 routerImmature.get('/interpolate', getRulesOfStandarisasiVegetatif);
+
+routerImmature.get('/pica-all', getAllPiCa);
+
+routerImmature.get('/', getRulesOfStandarisasiVegetatif);
 
 routerImmature.post('/vegetatif-proc', callProcVegetatif);
 
@@ -174,5 +252,8 @@ routerImmature.post('/serapan-biaya-upload', upload.single('file'), async (req, 
     });
   }
 });
+
+
+routerImmature.post('/submit-pi-ca', upload.any(), submitPiCa);
 
 export default routerImmature;

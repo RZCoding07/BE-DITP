@@ -24,6 +24,14 @@ const W = db_immature.define('pi', {
     measurement: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    approval: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, { freezeTableName: true });
 

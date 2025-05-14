@@ -5,24 +5,35 @@ import zlib from 'zlib';
 
 const cache = new NodeCache({ stdTTL: 600, checkperiod: 120 }); // Cache expires after 600 seconds (10 minutes)
 
-
 // Get all Vegetatif records with caching
 export const getAllVegetatif = async (req, res) => {
     try {
-        // Cek apakah data ada di cache
-        const cachedData = cache.get('allVegetatif');
-        if (cachedData) {
-            console.log("Cache hit for allVegetatif");
-            return res.status(200).json(cachedData);
+        const { regional, kebun } = req.body;
+
+        let query;
+        let replacements = [];
+
+        // Jika tidak ada regional dan kebun, tampilkan semua data
+        if (!regional && !kebun) {
+            query = `SELECT * FROM vegetatif ORDER BY bulan DESC, tahun DESC`;
+            replacements = [];
+        } else if (!kebun || kebun === "") {
+            // Buat query dengan IN clause untuk semua kebun di regional tersebut
+            query = `SELECT * FROM vegetatif WHERE regional = ? ORDER BY bulan DESC, tahun DESC`;
+            replacements = [regional];
+        } else {
+            // Jika kebun diisi, query seperti biasa
+            query = `SELECT * FROM vegetatif WHERE regional = ? AND kebun = ? ORDER BY bulan DESC, tahun DESC`;
+            replacements = [regional, kebun];
         }
 
-        // Ambil data dari database jika tidak ada di cache
-        const vegetatif = await Vegetatif.findAll();
-
-        // Simpan hasil query ke cache
-        cache.set('allVegetatif', vegetatif);
+        const vegetatif = await db_immature.query(query, {
+            replacements: replacements,
+            type: db_immature.QueryTypes.SELECT
+        });
 
         res.status(200).json(vegetatif);
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -98,8 +109,6 @@ export const updateVegetatif = async (req, res) => {
         if (!vegetatif) return res.status(404).json({ message: "Record not found" });
 
         await vegetatif.update(req.body);
-
-        // Clear cache so the data is refreshed
         cache.del('allVegetatif'); // Cache for all Vegetatif should be cleared
         cache.del(`vegetatif-${vegetatif.id}`); // Cache for updated record should be cleared
 
@@ -127,12 +136,55 @@ export const deleteVegetatif = async (req, res) => {
     }
 };
 
+
+export const bulkDeleteVegetatif = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        console.log('IDs to delete:', ids);
+
+        if (!Array.isArray(ids) || !ids.length) {
+            return res.status(400).json({ message: "Invalid or empty IDs array" });
+        }
+
+        // Find all records matching the provided IDs
+        const vegetatifs = await Vegetatif.findAll({
+            where: {
+                id: ids
+            }
+        });
+
+        // Debugging log to check what records were found
+        console.log('Requested IDs:', ids);
+        console.log('Found Vegetatifs:', vegetatifs.map(v => v.id));
+
+        // If some records were not found
+        if (vegetatifs.length !== ids.length) {
+            const notFoundIds = ids.filter(id => !vegetatifs.some(v => v.id === id));
+            return res.status(404).json({ message: `The following records were not found: ${notFoundIds.join(', ')}` });
+        }
+
+        // Delete all the records
+        await Vegetatif.destroy({
+            where: {
+                id: ids
+            }
+        });
+
+        res.status(200).json({
+            message: `${vegetatifs.length} records deleted successfully`
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
 // Controller to fetch distinct 'tahun' and 'bulan' from the 'vegetatif' table
 
 export const getDistinctTahunBulanVegetatif = async (req, res) => {
     try {
         // Query SQL untuk mengambil data distinct tahun dan bulan
-        const sqlQuery = "SELECT DISTINCT tahun, bulan FROM vegetatif";
+        const sqlQuery = "SELECT DISTINCT tahun FROM vegetatif  ORDER BY tahun DESC"
 
         // Execute the query
         const distinctTahunBulan = await db_immature.query(sqlQuery, {
@@ -148,6 +200,31 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
         });
     }
 };
+
+
+export const getDistinctBulanVegetatif = async (req, res) => {
+    try {
+        const { tahun } = req.body; // Ambil tahun dari parameter URL
+        // Query SQL untuk mengambil data distinct bulan berdasarkan tahun
+        const sqlQuery = "SELECT DISTINCT bulan FROM vegetatif WHERE tahun = :tahun ORDER BY bulan DESC"
+
+        // Execute the query
+        const distinctBulan = await db_immature.query(sqlQuery, {
+            replacements: { tahun },
+            type: db_immature.QueryTypes.SELECT,
+        });
+
+        // Kirim data sebagai response
+        return res.status(200).json(distinctBulan);
+    } catch (error) {
+        console.error("Error fetching distinct bulan:", error);
+        return res.status(500).json({
+            message: "Failed to fetch data. Please try again later.",
+        });
+    }
+};
+
+
 
 
 export const getKebunWhereRegVegetatif = async (req, res) => {
@@ -212,190 +289,200 @@ export const getAfdWhereKebunVegetatif = async (req, res) => {
     }
 };
 
-
 function interpolate(x, xp, yp) {
+    const validData = [];
+    for (let i = 0; i < xp.length; i++) {
+        if (yp[i] !== null && yp[i] !== undefined && !isNaN(yp[i])) {
+            validData.push({
+                x: xp[i],
+                y: yp[i]
+            });
+        }
+    }
+    if (validData.length === 0) {
+        return x.map(() => null);
+    }
+    validData.sort((a, b) => a.x - b.x);
+    const cleanXp = validData.map(item => item.x);
+    const cleanYp = validData.map(item => item.y);
     return x.map(xi => {
-        if (xi <= xp[0]) return yp[0];
-        if (xi >= xp[xp.length - 1]) return yp[yp.length - 1];
-
+        if (xi <= cleanXp[0]) return cleanYp[0];
+        if (xi >= cleanXp[cleanXp.length - 1]) return cleanYp[cleanYp.length - 1];
         let i = 0;
-        while (xp[i] < xi) i++;
-
-        const x0 = xp[i - 1];
-        const x1 = xp[i];
-        const y0 = yp[i - 1];
-        const y1 = yp[i];
-
+        while (i < cleanXp.length && cleanXp[i] < xi) i++;
+        if (i === 0 || i === cleanXp.length) return null;
+        const x0 = cleanXp[i - 1];
+        const x1 = cleanXp[i];
+        const y0 = cleanYp[i - 1];
+        const y1 = cleanYp[i];
         return y0 + (y1 - y0) * (xi - x0) / (x1 - x0);
     });
 }
 
 export const getRulesOfStandarisasiVegetatif = async (req, res) => {
-    const x_values = [6, 12, 18, 24, 30];
-    const datasets = [
-        [
-            [29.7, 69.7, 96.7, 134.2, 167.0],
-            [20.7, 36.8, 40.0, 39.6, 56.0],
-            [130.4, 218.9, 280.8, 319.8, 463.9],
-            [2.3, 4.0, 4.1, 4.5, 5.3],
-            [1.6, 2.9, 2.4, 2.7, 3.4],
-            [56.7, 78.8, 102.0, 123.1, 124.0],
-            [32.1, 56.5, 66.3, 72.7, 86.2],
-            [3.0, 3.7, 3.5, 4.0, 4.5],
-            [116.51, 150.0, 192.5, 235.0, 277.50]
-        ],
-        [
-            [32.0, 64.0, 98.9, 133.2, 173.0],
-            [18.9, 36.1, 39.7, 37.6, 52.0],
-            [155.6, 220.5, 282.9, 342.9, 486.9],
-            [2.5, 3.3, 4.2, 4.4, 5.1],
-            [1.7, 2.3, 2.5, 2.5, 3.3],
-            [55.0, 77.2, 96.0, 109.5, 119.0],
-            [37.7, 54.9, 63.7, 76.5, 80.9],
-            [3.4, 3.5, 3.8, 4.1, 4.5],
-            [116.51, 150.0, 192.5, 235.0, 277.50]
-        ],
-        [
-            [36.1, 65.9, 95.4, 134.5, 164.0],
-            [23.3, 34.6, 40.2, 40.5, 52.0],
-            [142.1, 208.3, 280.8, 337.0, 456.1],
-            [2.3, 3.4, 4.2, 4.3, 5.0],
-            [1.4, 2.4, 2.6, 3.1, 2.9],
-            [60.2, 73.9, 96.4, 119.4, 123.0],
-            [3.9, 55.0, 69.5, 74.2, 82.1],
-            [2.8, 3.3, 3.6, 4.1, 4.1],
-            [116.51, 150.0, 192.5, 235.0, 277.50]
-        ],
-        [
-            [36.1, 65.9, 95.4, 134.5, 164.0],
-            [23.3, 34.6, 40.2, 40.5, 52.0],
-            [148, 182.5, , 252.5, 289.5],
-            [2.3, 3.4, 4.2, 4.3, 5.0],
-            [1.4, 2.4, 2.6, 3.1, 2.9],
-            [60.2, 73.9, 96.4, 119.4, 123.0],
-            [3.9, 55.0, 69.5, 74.2, 82.1],
-            [2.8, 3.3, 3.6, 4.1, 4.3],
-            [116.51, 150.0, 192.5, 235.0, 277.50]
-        ],
-        [
-            [29.7, 69.7, 96.7, 134.2, 167.0],
-            [20.7, 36.8, 40.0, 39.6, 56.0],
-            [140, 190, 240, 285, 340],
-            [2.3, 4.0, 4.1, 4.5, 5.3],
-            [1.6, 2.9, 2.4, 2.7, 3.4],
-            [56.7, 78.8, 102.0, 123.1, 124.0],
-            [32.1, 56.5, 66.3, 72.7, 86.2],
-            [3.0, 3.7, 3.5, 4.0, 4.5],
-            [116.51, 150.0, 192.5, 235.0, 277.50]
-        ]
+    try {
+        const x_values = [6, 12, 18, 24, 30];
+        const datasets = [
+            [
+                [29.7, 69.7, 96.7, 134.2, 167.0],
+                [20.7, 36.8, 40.0, 39.6, 56.0],
+                [130.4, 218.9, 280.8, 319.8, 463.9],
+                [2.3, 4.0, 4.1, 4.5, 5.3],
+                [1.6, 2.9, 2.4, 2.7, 3.4],
+                [56.7, 78.8, 102.0, 123.1, 124.0],
+                [32.1, 56.5, 66.3, 72.7, 86.2],
+                [3.0, 3.7, 3.5, 4.0, 4.5],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ],
+            [
+                [32.0, 64.0, 98.9, 133.2, 173.0],
+                [18.9, 36.1, 39.7, 37.6, 52.0],
+                [155.6, 220.5, 282.9, 342.9, 486.9],
+                [2.5, 3.3, 4.2, 4.4, 5.1],
+                [1.7, 2.3, 2.5, 2.5, 3.3],
+                [55.0, 77.2, 96.0, 109.5, 119.0],
+                [37.7, 54.9, 63.7, 76.5, 80.9],
+                [3.4, 3.5, 3.8, 4.1, 4.5],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ],
+            [
+                [36.1, 65.9, 95.4, 134.5, 164.0],
+                [23.3, 34.6, 40.2, 40.5, 52.0],
+                [142.1, 208.3, 280.8, 337.0, 456.1],
+                [2.3, 3.4, 4.2, 4.3, 5.0],
+                [1.4, 2.4, 2.6, 3.1, 2.9],
+                [60.2, 73.9, 96.4, 119.4, 123.0],
+                [3.9, 55.0, 69.5, 74.2, 82.1],
+                [2.8, 3.3, 3.6, 4.1, 4.1],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ],
+            [
+                [36.1, 65.9, 95.4, 134.5, 164.0],
+                [23.3, 34.6, 40.2, 40.5, 52.0],
+                [148, 182.5, , 252.5, 289.5],
+                [2.3, 3.4, 4.2, 4.3, 5.0],
+                [1.4, 2.4, 2.6, 3.1, 2.9],
+                [60.2, 73.9, 96.4, 119.4, 123.0],
+                [3.9, 55.0, 69.5, 74.2, 82.1],
+                [2.8, 3.3, 3.6, 4.1, 4.3],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ],
+            [
+                [29.7, 69.7, 96.7, 134.2, 167.0],
+                [20.7, 36.8, 40.0, 39.6, 56.0],
+                [140, 190, 240, 285, 340],
+                [2.3, 4.0, 4.1, 4.5, 5.3],
+                [1.6, 2.9, 2.4, 2.7, 3.4],
+                [56.7, 78.8, 102.0, 123.1, 124.0],
+                [32.1, 56.5, 66.3, 72.7, 86.2],
+                [3.0, 3.7, 3.5, 4.0, 4.5],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ]
+        ];
+        const idx = parseInt(req.query.idx) || 1; // Default to dataset 1 if not specified
 
-    ];
+        if (idx < 1 || idx > datasets.length) {
+            return res.status(400).json({ error: "Invalid dataset index" });
+        }
 
-    const y_column_index = parseInt(req.query.y_column_index);
-    const idx = parseInt(req.query.idx);
+        const selectedDataset = datasets[idx - 1];
 
-    if (idx < 1 || idx > datasets.length) {
-        return res.status(400).json({ error: "Invalid dataset index" });
+        // Generate full range of months (1-36)
+        const x_full = Array.from({ length: 36 }, (_, i) => i + 1);
+
+        // Process all required indices (0, 1, 8)
+        const tinggiTanaman = interpolate(x_full, [1, ...x_values], [21, ...selectedDataset[0]]);
+        const jumlahPelepah = interpolate(x_full, [1, ...x_values], [18, ...selectedDataset[1]]);
+        const lingkarBatang = interpolate(x_full, [1, ...x_values], [48.5, ...selectedDataset[8]]);
+
+        // Create response array
+        const response = x_full.map(umur => {
+            // Determine fase based on age
+            let fase;
+            if (umur <= 12) fase = "TBM I";
+            else if (umur <= 24) fase = "TBM II";
+            else fase = "TBM III";
+
+            // Helper functions for formatting
+            const formatRange = (value, baseValue) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: rounded,
+                    skor90: rounded - 1,
+                    skor80: rounded - 2
+                };
+            };
+
+            const formatLingkarBatang = (value) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: `>= ${rounded + 5}`,
+                    skor90: `${rounded} - ${rounded + 4}`,
+                    skor80: `< ${rounded}`.replace('\u003C', '<') // Ensure proper < character
+                };
+            };
+
+            const formatTinggiTanaman = (value) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: `>= ${rounded}`,
+                    skor90: `${rounded - 2} - ${rounded - 1}`,
+                    skor80: `< ${rounded - 2}`.replace('\u003C', '<') // Ensure proper < character
+                };
+            };
+
+            const formatKerapatanPokok = (value) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: `${rounded} - ${rounded + 3}`,
+                    skor90: `${rounded - 10} - ${rounded - 1}`,
+                    skor80: `< ${rounded - 10}`.replace('\u003C', '<') // Ensure proper < character
+                };
+            };
+
+            return {
+                fase,
+                umur,
+                lingkarBatang: formatLingkarBatang(lingkarBatang[umur - 1]),
+                jumlahPelepah: formatRange(jumlahPelepah[umur - 1], 18),
+                tinggiTanaman: formatTinggiTanaman(tinggiTanaman[umur - 1])
+            };
+        });
+
+        // Convert response to string and replace any escaped characters
+        const responseString = JSON.stringify(response, null, 2).replace(/\\u003C/g, '<');
+
+        // Send as proper JSON
+        res.setHeader('Content-Type', 'application/json');
+        return res.send(responseString);
+    } catch (error) {
+        console.error("Error in getRulesOfStandarisasiVegetatif:", error);
+        return res.status(500).json({ error: "Internal server error" });
     }
-
-    const data = datasets[idx - 1];
-    const y_values = data[y_column_index];
-
-    if (Array.isArray(y_values[0])) {
-        return res.status(400).json({ error: `Dataset ${idx}: Contains nested data, interpolation skipped.` });
-    }
-
-    const x_full = Array.from({ length: 30 }, (_, i) => i + 1);
-    const x_values_modified = [1, ...x_values];
-    const y_values_modified =
-        y_column_index === 0
-            ? [21, ...y_values]
-            : y_column_index === 1
-                ? [18, ...y_values]
-                : y_column_index === 8
-                    ? [48.5, ...y_values]
-                    : y_values;
-
-    const y_full = interpolate(x_full, x_values_modified, y_values_modified);
-
-    const result = Object.fromEntries(x_full.map((x, i) => [x, Number(y_full[i].toFixed(2))]));
-
-    return res.json(result);
 }
 
-
-
-// Fungsi dengan caching
 export const callProcVegetatif = async (req, res) => {
     try {
         const {
-            input_tbm,
-            input_tahun_tanam,
             input_bulan,
-            input_tahun
+            input_tahun,
         } = req.body;
 
-        // // Generate cache key berdasarkan parameter
-        const cacheKey = `vegetatif:${input_tbm}:${input_tahun_tanam}:${input_bulan}:${input_tahun}`;
-
-        // // Cek apakah data sudah ada di cache
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-            return res.json({
-                success: true,
-                data: cachedData,
-                source: 'cache',
-            });
-        }
-
-        // Panggil prosedur jika data tidak ditemukan di cache
         const query = `
-        SELECT 
-            vw_vegetatif.id,
-            vw_vegetatif.regional,
-            vw_vegetatif.kebun,
-            vw_vegetatif.afdeling,
-            vw_vegetatif.blok,
-            vw_vegetatif.tahun_tanam,
-            vw_vegetatif.varietas,
-            vw_vegetatif.luas_ha,
-            vw_vegetatif.jumlah_pokok_awal_tanam,
-            vw_vegetatif.jumlah_pokok_sekarang,
-            vw_vegetatif.tinggi_tanaman_cm,
-            vw_vegetatif.jumlah_pelepah_bh,
-            vw_vegetatif.panjang_rachis_cm,
-            vw_vegetatif.lebar_petiola_cm,
-            vw_vegetatif.tebal_petiola_cm,
-            vw_vegetatif.jad_1_sisi,
-            vw_vegetatif.rerata_panjang_anak_daun,
-            vw_vegetatif.rerata_lebar_anak_daun,
-            vw_vegetatif.lingkar_batang_cm,
-            vw_vegetatif.tahun,
-            vw_vegetatif.bulan,
-            vw_vegetatif.cal_jumlah_pelepah,
-            vw_vegetatif.cal_lingkar_batang,
-            vw_vegetatif.cal_tinggi_tanaman
-        FROM vw_vegetatif
+        SELECT * FROM vw_vegetatif
         WHERE 
-            (
-                'tbm4' = '${input_tbm}'
-                AND vw_vegetatif.tahun_tanam <= '${input_tahun_tanam}'  
-            )
-            OR 
-            (
-                'tbm4' <> '${input_tbm}' 
-                AND vw_vegetatif.tahun_tanam = '${input_tahun_tanam}'
-            )
-            AND vw_vegetatif.bulan = '${input_bulan}'
-            AND vw_vegetatif.tahun = '${input_tahun}';
-              `;
-      const results = await db_immature.query(query, {
-        type: db_immature.QueryTypes.SELECT,
+          vw_vegetatif.bulan = :bulan AND
+          vw_vegetatif.tahun = :tahun
+      `;
+
+        const results = await db_immature.query(query, {
+            replacements: {
+                bulan: input_bulan,
+                tahun: input_tahun,
+            },
+            type: db_immature.QueryTypes.SELECT,
         });
-        
-        // Simpan hasil ke cache
-        cache.set(cacheKey, results);
-        
+
         res.json({
             success: true,
             data: results,
@@ -410,3 +497,50 @@ export const callProcVegetatif = async (req, res) => {
         });
     }
 };
+
+
+export const getVwVegetatifById = async (req, res) => {
+    try {
+
+        const id = req.body.id
+        const cachedData = cache.get(`vwVegetatif-${id}`);
+        if (cachedData) {
+            console.log(`Cache hit for vwVegetatif-${id}`);
+            return res.status(200).json(cachedData);
+        }
+
+        const vegetatif = await db_immature.query(`SELECT * FROM vw_vegetatif WHERE id = "${id}"`, {
+            type: db_immature.QueryTypes.SELECT,
+        });
+        if (!vegetatif) return res.status(404).json({ message: "Record not found" });
+
+        cache.set(`vwVegetatif-${id}`, vegetatif);
+
+        res.status(200).json(vegetatif);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+export const getAllVegetatifProgress = async (req, res) => {
+    try {
+        const { bulan, tahun } = req.params; // Ambil bulan dan tahun dari request body
+
+        // Query ke database untuk mendapatkan data vegetatif berdasarkan bulan dan tahun
+        const vegetatif = await db_immature.query(
+            `SELECT * FROM get_vegetatif_progress WHERE tahun = :tahun`,
+            {
+                replacements: { tahun },
+                type: db_immature.QueryTypes.SELECT,
+            }
+        );
+
+        if (!vegetatif) return res.status(404).json({ message: "Record not found" });
+
+        res.status(200).json(vegetatif);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
