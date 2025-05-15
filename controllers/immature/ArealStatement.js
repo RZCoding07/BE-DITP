@@ -190,8 +190,7 @@ export const getAllArealTbm = async (req, res) => {
 export const getAllArealTbmMaster = async (req, res) => {
     try {
         const { tahun, rpc, kebun } = req.body;
-        
-        // Build the query with dynamic WHERE conditions
+
         let query = `
           SELECT * FROM vw_areal 
           WHERE tahun = :tahun AND luasan != 0 AND rpc = :rpc AND kode_kebun = :kebun
