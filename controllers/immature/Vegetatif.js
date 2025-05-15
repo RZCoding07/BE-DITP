@@ -1,11 +1,7 @@
 import Vegetatif from '../../models/immature/VegetatifModel.js';
 import { db_immature } from '../../config/Database.js';
-import NodeCache from 'node-cache';
-import zlib from 'zlib';
 
-const cache = new NodeCache({ stdTTL: 600, checkperiod: 120 }); // Cache expires after 600 seconds (10 minutes)
-
-// Get all Vegetatif records with caching
+// Get all Vegetatif records
 export const getAllVegetatif = async (req, res) => {
     try {
         const { regional, kebun } = req.body;
@@ -39,7 +35,6 @@ export const getAllVegetatif = async (req, res) => {
     }
 };
 
-
 export const getVegetatifByBulanTahun = async (req, res) => {
     try {
         const { bulan, tahun } = req.params;
@@ -60,27 +55,14 @@ export const getVegetatifByBulanTahun = async (req, res) => {
     }
 }
 
-
-
-
-// Get a single Vegetatif record by ID with caching
+// Get a single Vegetatif record by ID
 export const getVegetatifById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Cek apakah data ada di cache
-        const cachedData = cache.get(`vegetatif-${id}`);
-        if (cachedData) {
-            console.log(`Cache hit for vegetatif-${id}`);
-            return res.status(200).json(cachedData);
-        }
-
-        // Ambil data dari database jika tidak ada di cache
+        // Ambil data dari database
         const vegetatif = await Vegetatif.findByPk(id);
         if (!vegetatif) return res.status(404).json({ message: "Record not found" });
-
-        // Simpan hasil query ke cache
-        cache.set(`vegetatif-${id}`, vegetatif);
 
         res.status(200).json(vegetatif);
     } catch (error) {
@@ -92,10 +74,6 @@ export const getVegetatifById = async (req, res) => {
 export const createVegetatif = async (req, res) => {
     try {
         const newRecord = await Vegetatif.create(req.body);
-
-        // Clear cache so the data is refreshed
-        cache.del('allVegetatif'); // Cache for all Vegetatif should be cleared
-
         res.status(201).json(newRecord);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -109,9 +87,6 @@ export const updateVegetatif = async (req, res) => {
         if (!vegetatif) return res.status(404).json({ message: "Record not found" });
 
         await vegetatif.update(req.body);
-        cache.del('allVegetatif'); // Cache for all Vegetatif should be cleared
-        cache.del(`vegetatif-${vegetatif.id}`); // Cache for updated record should be cleared
-
         res.status(200).json(vegetatif);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -125,17 +100,11 @@ export const deleteVegetatif = async (req, res) => {
         if (!vegetatif) return res.status(404).json({ message: "Record not found" });
 
         await vegetatif.destroy();
-
-        // Clear cache so the data is refreshed
-        cache.del('allVegetatif'); // Cache for all Vegetatif should be cleared
-        cache.del(`vegetatif-${vegetatif.id}`); // Cache for deleted record should be cleared
-
         res.status(200).json({ message: "Record deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
-
 
 export const bulkDeleteVegetatif = async (req, res) => {
     try {
@@ -178,9 +147,7 @@ export const bulkDeleteVegetatif = async (req, res) => {
     }
 };
 
-
 // Controller to fetch distinct 'tahun' and 'bulan' from the 'vegetatif' table
-
 export const getDistinctTahunBulanVegetatif = async (req, res) => {
     try {
         // Query SQL untuk mengambil data distinct tahun dan bulan
@@ -200,7 +167,6 @@ export const getDistinctTahunBulanVegetatif = async (req, res) => {
         });
     }
 };
-
 
 export const getDistinctBulanVegetatif = async (req, res) => {
     try {
@@ -224,19 +190,8 @@ export const getDistinctBulanVegetatif = async (req, res) => {
     }
 };
 
-
-
-
 export const getKebunWhereRegVegetatif = async (req, res) => {
     try {
-        // Cek apakah data ada di cache
-        const cacheKey = `distinctKebun-${req.body.rpc}`;
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-            console.log(`Cache hit for distinctKebun with regional: ${req.body.rpc}`);
-            return res.status(200).json(cachedData);
-        }
-
         // SQL query untuk mengambil distinct kebun berdasarkan regional
         const sqlQuery = "SELECT DISTINCT kebun FROM vegetatif WHERE regional = :regional ORDER BY kebun ASC";
 
@@ -245,9 +200,6 @@ export const getKebunWhereRegVegetatif = async (req, res) => {
             replacements: { regional: req.body.rpc },
             type: db_immature.QueryTypes.SELECT,
         });
-
-        // Simpan hasil query ke cache
-        cache.set(cacheKey, distinctKebun);
 
         return res.status(200).json(distinctKebun);
     } catch (error) {
@@ -260,14 +212,6 @@ export const getKebunWhereRegVegetatif = async (req, res) => {
 
 export const getAfdWhereKebunVegetatif = async (req, res) => {
     try {
-        // Cek apakah data ada di cache
-        const cacheKey = `distinctAfd-${req.body.rpc}-${req.body.kebun}`;
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-            console.log(`Cache hit for distinctAfd with regional: ${req.body.rpc} and kebun: ${req.body.kebun}`);
-            return res.status(200).json(cachedData);
-        }
-
         // SQL query untuk mengambil distinct afdeling berdasarkan regional dan kebun
         const sqlQuery = "SELECT DISTINCT afdeling FROM vegetatif WHERE regional = :regional AND kebun = :kebun ORDER BY afdeling ASC";
 
@@ -276,9 +220,6 @@ export const getAfdWhereKebunVegetatif = async (req, res) => {
             replacements: { regional: req.body.rpc, kebun: req.body.kebun },
             type: db_immature.QueryTypes.SELECT,
         });
-
-        // Simpan hasil query ke cache
-        cache.set(cacheKey, distinctAfd);
 
         return res.status(200).json(distinctAfd);
     } catch (error) {
@@ -307,7 +248,7 @@ function interpolate(x, xp, yp) {
     const cleanYp = validData.map(item => item.y);
     return x.map(xi => {
         if (xi <= cleanXp[0]) return cleanYp[0];
-        if (xi >= cleanXp[cleanXp.length - 1]) return cleanYp[cleanYp.length - 1];
+        if (xi >= cleanXp[cleanXp.length - 1]) return cleanYp[cleanXp.length - 1];
         let i = 0;
         while (i < cleanXp.length && cleanXp[i] < xi) i++;
         if (i === 0 || i === cleanXp.length) return null;
@@ -498,31 +439,19 @@ export const callProcVegetatif = async (req, res) => {
     }
 };
 
-
 export const getVwVegetatifById = async (req, res) => {
     try {
-
         const id = req.body.id
-        const cachedData = cache.get(`vwVegetatif-${id}`);
-        if (cachedData) {
-            console.log(`Cache hit for vwVegetatif-${id}`);
-            return res.status(200).json(cachedData);
-        }
-
         const vegetatif = await db_immature.query(`SELECT * FROM vw_vegetatif WHERE id = "${id}"`, {
             type: db_immature.QueryTypes.SELECT,
         });
         if (!vegetatif) return res.status(404).json({ message: "Record not found" });
-
-        cache.set(`vwVegetatif-${id}`, vegetatif);
 
         res.status(200).json(vegetatif);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 }
-
-
 
 export const getAllVegetatifProgress = async (req, res) => {
     try {

@@ -154,35 +154,15 @@ export const getAllKebunVegetatifArealTbm = async (req, res) => {
     }
 };
 
+
 export const getAllArealTbm = async (req, res) => {
     try {
-        const { tahun, rpc, kode_kebun } = req.body;
-        
-        // Build the query with dynamic WHERE conditions
-        let query = `
-  SELECT 
-    kode_kebun, 
-    calculated_tbm, 
-    SUM(luasan) as total_luasan
-FROM 
-    vw_areal
-WHERE 
-    tahun = :tahun 
-    AND luasan != 0
-GROUP BY 
-    kode_kebun, calculated_tbm
-ORDER BY 
-    kode_kebun, calculated_tbm
-
-
-          `;
-        
-        // Add additional filters if provided
-        const replacements = { tahun };
-        
-        
+        const { tahun } = req.body;
+        const query = `
+          SELECT * FROM vw_areal WHERE tahun = 2025 
+    `;
         const rows = await db_immature.query(query, {
-            replacements,
+            replacements: { tahun },
             type: db_immature.QueryTypes.SELECT
         });
 
@@ -213,21 +193,8 @@ export const getAllArealTbmMaster = async (req, res) => {
         
         // Build the query with dynamic WHERE conditions
         let query = `
-SELECT 
-    kode_kebun,
-    calculated_tbm,
-    SUM(luasan) AS total_luasan
-FROM 
-    vw_areal
-WHERE 
-    tahun = :tahun 
-    AND luasan != 0 
-    AND rpc = :rpc 
-    AND kode_kebun = :kebun
-GROUP BY 
-    kode_kebun, calculated_tbm
-ORDER BY 
-    kode_kebun, calculated_tbm
+          SELECT * FROM vw_areal 
+          WHERE tahun = :tahun AND luasan != 0 AND rpc = :rpc AND kode_kebun = :kebun
         `;
         
         // Add replacements for the query parameters
