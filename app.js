@@ -11,14 +11,15 @@ import routerMaster from './routes/master.js';
 import { rateLimit } from 'express-rate-limit'
 import compression from "compression";
 import Areal from './models/immature/ASModel.js';
-
+import WeeklyProgress from './models/immature/ProgressMingguanPICAModel.js';
+import routerReplanting from './routes/replanting.js';
 dotenv.config();
 
 const app = express();
 app.use(compression());
 // Allow all origins (or specify specific origins if needed)
 app.use(cors({
-    origin: ["https://ev4palms.vercel.app", "http://localhost:3000", "https://www.ditn-palmco.my.id"], // Frontend origin
+    origin: ["https://ev4palms.vercel.app", "http://localhost:3100", "http://localhost:3000", "https://www.ditn-palmco.my.id", "https://picatekpol.my.id"], // Frontend originmy.
     methods: 'GET, POST, PUT, DELETE, OPTIONS', // Allowed methods
     allowedHeaders: 'Content-Type, Authorization, X-Requested-With', // Allowed headers
     credentials: true, // If you need cookies to be included in requests
@@ -40,6 +41,7 @@ const initializeDatabaseMaster = async () => {
 const initializeDatabaseImmature = async () => {
     try {
         await db_immature.authenticate(); // Test connection\
+        // await WeeklyProgress.sync(); // Sync the model with the database
         console.log('Connection immature has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
@@ -72,10 +74,16 @@ initializeDatabaseNursery();
 
 
 app.use(express.json());  // Parse JSON bodies
-app.use(express.urlencoded({ extended: true }));  // Parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));  // Parse URL-encoded bodies\
 app.use(cookieParser());  // Parse Cookie header and populate req.cookies
+
+app.set('trust proxy', 1);
+
+
 app.use('/api-immature', routerImmature);
 app.use('/api-master', routerMaster);
+app.use('/api-replanting', routerReplanting);
+
 
 app.use((err, req, res, next) => {
     console.error('Error occurred:', err);

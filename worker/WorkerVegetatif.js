@@ -3,78 +3,110 @@ import Vegetatif from '../models/immature/VegetatifModel.js';
 import { db_immature } from '../config/Database.js';
 import { QueryTypes } from 'sequelize';
 
+// Helper function to validate and format dates
+function validateDate(dateString) {
+  if (!dateString || dateString === 'Invalid date') {
+    return null; // Return null for invalid dates
+  }
+  try {
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? null : date;
+  } catch (error) {
+    return null;
+  }
+}
+
 async function handleDataBatch(data) {
+  if (!data || data.length === 0) {
+    return { success: true, updatedCount: 0, message: 'No data to process' };
+  }
+
   const transaction = await db_immature.transaction();
   try {
-    if (!data || data.length === 0) {
-      return { success: true, updatedCount: 0, message: 'No data to process' };
-    }
+    console.log(`Processing batch of ${data.length} records`);
+    
+    // First, validate all records and fix dates
+    const validatedData = data.map(record => ({
+      ...record,
+      tanggal_pengamatan: validateDate(record.tanggal_pengamatan)
+    }));
 
-    // Prepare arrays for bulk insert and update
     const recordsToInsert = [];
     const recordsToUpdate = [];
 
-    // Check each record individually
-    for (const record of data) {
-      const existingRecord = await db_immature.query(
-        `SELECT id FROM vegetatif 
-         WHERE bulan = :bulan 
-           AND tahun = :tahun 
-           AND regional = :regional 
-           AND kebun = :kebun 
-           AND afdeling = :afdeling 
-           AND blok = :blok`,
-        {
-          replacements: {
-            bulan: record.bulan,
-            tahun: record.tahun,
-            regional: record.regional,
-            kebun: record.kebun,
-            afdeling: record.afdeling,
-            blok: record.blok
-          },
-          type: QueryTypes.SELECT,
-          transaction
-        }
-      );
+    // Process records in smaller chunks if needed
+    const chunkSize = 100;
+    for (let i = 0; i < validatedData.length; i += chunkSize) {
+      const chunk = validatedData.slice(i, i + chunkSize);
+      
+      for (const record of chunk) {
+        try {
+          const existingRecord = await Vegetatif.findOne({
+            where: {
+              bulan: record.bulan,
+              tahun: record.tahun,
+              regional: record.regional,
+              kebun: record.kebun,
+              afdeling: record.afdeling,
+              blok: record.blok
+            },
+            transaction,
+            raw: true
+          });
 
-      if (existingRecord.length > 0) {
-        // Record exists, prepare for update
-        recordsToUpdate.push({
-          ...record,
-          id: existingRecord[0].id // Include the existing ID for update
-        });
-      } else {
-        // New record, prepare for insert
-        recordsToInsert.push(record);
+          if (existingRecord) {
+            recordsToUpdate.push({
+              ...record,
+              id: existingRecord.id
+            });
+          } else {
+            recordsToInsert.push(record);
+          }
+        } catch (error) {
+          console.error('Error checking record:', error);
+          throw error;
+        }
       }
     }
 
     let insertCount = 0;
     let updateCount = 0;
 
-    // Perform bulk insert for new records
+    // Insert new records
     if (recordsToInsert.length > 0) {
-      await Vegetatif.bulkCreate(recordsToInsert, { transaction });
-      insertCount = recordsToInsert.length;
+      console.log(`Inserting ${recordsToInsert.length} new records`);
+      try {
+        await Vegetatif.bulkCreate(recordsToInsert, { transaction });
+        insertCount = recordsToInsert.length;
+        console.log(`Successfully inserted ${insertCount} records`);
+      } catch (insertError) {
+        console.error('Bulk insert failed:', insertError);
+        throw insertError;
+      }
     }
 
-    // Perform updates for existing records
+    // Update existing records
     if (recordsToUpdate.length > 0) {
-      // Determine which fields to update (all except the unique key fields)
-      const firstItem = recordsToUpdate[0] || {};
-      const allFields = Object.keys(firstItem);
-      const uniqueKeyFields = ['id', 'bulan', 'tahun', 'regional', 'kebun', 'afdeling', 'blok'];
-      const fieldsToUpdate = allFields.filter(field => !uniqueKeyFields.includes(field));
+      console.log(`Updating ${recordsToUpdate.length} existing records`);
+      try {
+        const updateFields = Object.keys(recordsToUpdate[0] || {})
+          .filter(field => !['id', 'bulan', 'tahun', 'regional', 'kebun', 'afdeling', 'blok'].includes(field));
 
-      await Vegetatif.bulkCreate(recordsToUpdate, {
-        transaction,
-        updateOnDuplicate: fieldsToUpdate
-      });
-      updateCount = recordsToUpdate.length;
+        await Vegetatif.bulkCreate(recordsToUpdate, {
+          transaction,
+          updateOnDuplicate: updateFields
+        });
+        updateCount = recordsToUpdate.length;
+        console.log(`Successfully updated ${updateCount} records`);
+      } catch (updateError) {
+        console.error('Bulk update failed:', updateError);
+        throw updateError;
+      }
     }
 
     await transaction.commit();
+    console.log('Transaction committed successfully');
+    
     return { 
       success: true, 
       insertCount, 
@@ -82,6 +114,7 @@ async function handleDataBatch(data) {
       totalProcessed: data.length
     };
   } catch (error) {
+    console.error('Transaction failed:', error);
     await transaction.rollback();
     return { 
       success: false, 
@@ -92,8 +125,18 @@ async function handleDataBatch(data) {
 }
 
 parentPort.on('message', async (data) => {
-  const result = await handleDataBatch(data);
-  parentPort.postMessage(result);
+  try {
+    console.log('Worker received data batch');
+    const result = await handleDataBatch(data);
+    parentPort.postMessage(result);
+  } catch (error) {
+    console.error('Worker error:', error);
+    parentPort.postMessage({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
 });
 
 export default handleDataBatch;

@@ -10,6 +10,11 @@ const Ckebun = db_replanting.define('c_kebun', {
         allowNull: false,
         autoIncrement: true,
       },
+      Kodering: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        unique: true,
+      },
       Kebun: {
         type: DataTypes.STRING(512),
         allowNull: true,

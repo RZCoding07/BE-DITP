@@ -40,11 +40,12 @@ import {
 } from '../controllers/immature/SerapanBiaya.js';
 
 import { createPi, deletePiById, getAllWhy, getPiById, updatePiById } from "../controllers/immature/Why.js";
-import { getAllCa } from "../controllers/immature/CorrectiveAction.js";
+import { createCa, getAllCa } from "../controllers/immature/CorrectiveAction.js";
 import PiCa from "../models/immature/PiCaModel.js";
 import CaImage from "../models/immature/CaImageModel.js";
-import { getAllPiCa, picaw3Count, submitPiCa } from "../controllers/immature/PICA.js";
+import { getAllPiCa, getAllPiCaCursor, getVwFinalPica, picaw3Count, submitPiCa } from "../controllers/immature/PICA.js";
 import { getAllAreal, getAllArealTbm, getAllArealTbmMaster, getAllKebunVegetatifAreal, getAllKebunVegetatifArealTbm, vwCalculateAreal } from "../controllers/immature/ArealStatement.js";
+import { getProgress, saveProgress } from "../controllers/immature/ProgressMingguanPICA.js";
 
 const routerImmature = express.Router();
 
@@ -86,6 +87,10 @@ routerImmature.post('/base-tbm', createBaseTBM);
 routerImmature.put('/base-tbm/:id', updateBaseTBM);
 routerImmature.delete('/base-tbm/:id', deleteBaseTBM);
 
+//routes for PiCa Weekly Progress
+routerImmature.post('/weekly-progress/save', saveProgress);
+routerImmature.get('/weekly-progress/:id', getProgress);
+
 // Routes for SerapanBiaya
 routerImmature.get('/serapan-biaya', getAllSerapanBiaya);
 routerImmature.get('/serapan-biaya/:id', getSerapanBiayaById);
@@ -104,6 +109,7 @@ routerImmature.get('/why/:id', getPiById);
 routerImmature.put('/why/:id', updatePiById);
 
 routerImmature.get('/ca', getAllCa);
+routerImmature.post('/ca', createCa);
 
 routerImmature.post('/areal-tbm-rpc-kebun', getAllArealTbm);
 routerImmature.post('/areal-tbm-master', getAllArealTbmMaster);
@@ -206,11 +212,12 @@ routerImmature.get('/vegetatif-bulan-tahun/:bulan/:tahun', getVegetatifByBulanTa
 
 routerImmature.get('/interpolate', getRulesOfStandarisasiVegetatif);
 
-routerImmature.get('/pica-all', getAllPiCa);
+routerImmature.get('/pica-all', getAllPiCaCursor);
 
 routerImmature.get('/', getRulesOfStandarisasiVegetatif);
 
 routerImmature.post('/vegetatif-proc', callProcVegetatif);
+routerImmature.post('/vegetatif-final',  getVwFinalPica);
 
 routerImmature.post('/get-kebun-where-reg-vegetatif', getKebunWhereRegVegetatif);
 routerImmature.post('/get-afd-where-kebun-vegetatif', getAfdWhereKebunVegetatif);

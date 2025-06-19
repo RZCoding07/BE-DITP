@@ -11,15 +11,15 @@ export const getAllVegetatif = async (req, res) => {
 
         // Jika tidak ada regional dan kebun, tampilkan semua data
         if (!regional && !kebun) {
-            query = `SELECT * FROM vegetatif ORDER BY bulan DESC, tahun DESC`;
+            query = `SELECT * FROM vw_vegetatif ORDER BY bulan DESC, tahun DESC`;
             replacements = [];
         } else if (!kebun || kebun === "") {
             // Buat query dengan IN clause untuk semua kebun di regional tersebut
-            query = `SELECT * FROM vegetatif WHERE regional = ? ORDER BY bulan DESC, tahun DESC`;
+            query = `SELECT * FROM vw_vegetatif WHERE regional = ? ORDER BY bulan DESC, tahun DESC`;
             replacements = [regional];
         } else {
             // Jika kebun diisi, query seperti biasa
-            query = `SELECT * FROM vegetatif WHERE regional = ? AND kebun = ? ORDER BY bulan DESC, tahun DESC`;
+            query = `SELECT * FROM vw_vegetatif WHERE regional = ? AND kebun = ? ORDER BY bulan DESC, tahun DESC`;
             replacements = [regional, kebun];
         }
 
@@ -410,10 +410,10 @@ export const callProcVegetatif = async (req, res) => {
         } = req.body;
 
         const query = `
-        SELECT * FROM vw_vegetatif
+        SELECT * FROM vw_final_vegetatif
         WHERE 
-          vw_vegetatif.bulan = :bulan AND
-          vw_vegetatif.tahun = :tahun
+          vw_final_vegetatif.bulan = :bulan AND
+          vw_final_vegetatif.tahun = :tahun
       `;
 
         const results = await db_immature.query(query, {
@@ -455,21 +455,24 @@ export const getVwVegetatifById = async (req, res) => {
 
 export const getAllVegetatifProgress = async (req, res) => {
     try {
-        const { bulan, tahun } = req.params; // Ambil bulan dan tahun dari request body
+        const { tahun } = req.params; // Ambil tahun dari parameter URL
 
-        // Query ke database untuk mendapatkan data vegetatif berdasarkan bulan dan tahun
+        // Query ke database untuk mendapatkan data vegetatif berdasarkan tahun
         const vegetatif = await db_immature.query(
-            `SELECT * FROM vw_vegetatif_progress WHERE tahun = :tahun`,
+            `SELECT * FROM vw_vegetatif_progress WHERE Tahun = :tahun`,
             {
                 replacements: { tahun },
                 type: db_immature.QueryTypes.SELECT,
             }
         );
 
-        if (!vegetatif) return res.status(404).json({ message: "Record not found" });
+        if (!vegetatif || vegetatif.length === 0) {
+            return res.status(404).json({ message: "Record not found" });
+        }
 
         res.status(200).json(vegetatif);
     } catch (error) {
+        console.error('Error in getAllVegetatifProgress:', error);
         res.status(500).json({ message: error.message });
     }
 }

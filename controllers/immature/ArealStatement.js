@@ -82,7 +82,7 @@ export const getAllKebunVegetatifAreal = async (req, res) => {
         calculated_tbm
       FROM vw_areal
       WHERE tahun = :tahun AND luasan > 0
-      GROUP BY rpc, kode_kebun, luasan, calculated_tbm
+      GROUP BY nama_kebun, rpc, kode_kebun, luasan, calculated_tbm
       ORDER BY rpc, kode_kebun, luasan, calculated_tbm
     `;
         const rows = await db_immature.query(query, {
@@ -93,8 +93,7 @@ export const getAllKebunVegetatifAreal = async (req, res) => {
         // 2. Grouping berdasarkan rpc
         const grouping = rows.reduce((acc, { calculated_tbm, rpc, kode_kebun, nama_kebun, luasan }) => {
             if (!acc[rpc]) acc[rpc] = [];
-            // Menambahkan nama kebun ke dalam data
-            acc[rpc].push({ kode_kebun, nama_kebun, rpc, luasan , calculated_tbm });
+            acc[rpc].push({ kode_kebun, nama_kebun, rpc, luasan, calculated_tbm });
             return acc;
         }, {});
 
@@ -104,13 +103,13 @@ export const getAllKebunVegetatifAreal = async (req, res) => {
             kebuns
         }));
 
-        // 4. Kirim response
         res.json({ regionals });
     } catch (err) {
         console.error('Error fetching regional-kebun data:', err);
         res.status(500).json({ error: 'Gagal mengambil data regional-kebun' });
     }
 };
+
 
 export const getAllKebunVegetatifArealTbm = async (req, res) => {
     try {
@@ -120,12 +119,12 @@ export const getAllKebunVegetatifArealTbm = async (req, res) => {
               nama_kebun,
               kode_kebun,
               rpc,
-            luasan,
+              luasan,
               calculated_tbm
             FROM vw_areal
             WHERE tahun = :tahun 
             AND luasan > 0
-            GROUP BY kode_kebun, calculated_tbm, luasan
+            GROUP BY nama_kebun, kode_kebun, rpc, calculated_tbm, luasan
             ORDER BY kode_kebun, calculated_tbm, luasan
     `;
         const rows = await db_immature.query(query, {
@@ -136,7 +135,6 @@ export const getAllKebunVegetatifArealTbm = async (req, res) => {
         // 2. Grouping berdasarkan calculated_tbm
         const grouping = rows.reduce((acc, { calculated_tbm, kode_kebun, nama_kebun, rpc, luasan }) => {
             if (!acc[calculated_tbm]) acc[calculated_tbm] = [];
-            // Menambahkan nama kebun ke dalam data
             acc[calculated_tbm].push({ kode_kebun, nama_kebun, rpc, luasan, calculated_tbm });
             return acc;
         }, {});
@@ -153,7 +151,6 @@ export const getAllKebunVegetatifArealTbm = async (req, res) => {
         res.status(500).json({ error: 'Gagal mengambil data regional-kebun' });
     }
 };
-
 
 export const getAllArealTbm = async (req, res) => {
     try {
@@ -190,7 +187,8 @@ export const getAllArealTbm = async (req, res) => {
 export const getAllArealTbmMaster = async (req, res) => {
     try {
         const { tahun, rpc, kebun } = req.body;
-
+        
+        // Build the query with dynamic WHERE conditions
         let query = `
           SELECT * FROM vw_areal 
           WHERE tahun = :tahun AND luasan != 0 AND rpc = :rpc AND kode_kebun = :kebun

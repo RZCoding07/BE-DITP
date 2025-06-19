@@ -1,4 +1,5 @@
 import { db_immature } from '../../config/Database.js';
+import Ca from '../../models/immature/CaModel.js';
 import NodeCache from 'node-cache';
 
 
@@ -28,3 +29,28 @@ export const getAllCa = async (req, res) => {
     }
 };
 
+
+
+export const createCa = async (req, res) => {
+    try {
+        const { w1, w2, w3, ca, measurement } = req.body;
+        
+        const newCa = await Ca.create({
+            w1,
+            w2,
+            w3,
+            ca,
+            measurement
+        });
+        
+        res.status(201).json({
+            message: "Data created successfully",
+            data: newCa
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Error creating data",
+            error: error.message
+        });
+    }
+};
