@@ -19,10 +19,19 @@ const app = express();
 app.use(compression());
 // Allow all origins (or specify specific origins if needed)
 app.use(cors({
-    origin: ["https://ev4palms.vercel.app", "http://localhost:3100", "https://www.ditn-palmco.my.id", "https://picatekpol.my.id", "https://www.ptpn4.co.id", "https://www.investasi-tanaman.ptpn4.co.id", "https://investasi-tanaman.ptpn4.co.id", "https://ptpn4.co.id"], // Replace with your frontend URL
-    methods: 'GET, POST, PUT, DELETE, OPTIONS', // Allowed methods
-    allowedHeaders: 'Content-Type, Authorization, X-Requested-With', // Allowed headers
-    credentials: true, // If you need cookies to be included in requests
+    origin: [
+        "https://ev4palms.vercel.app",
+        "http://localhost:3100",
+        "https://www.ditn-palmco.my.id",
+        "https://picatekpol.my.id",
+        "https://ptpn4.co.id",
+        "https://www.ptpn4.co.id",
+        "https://www.investasi-tanaman.ptpn4.co.id",
+        "https://investasi-tanaman.ptpn4.co.id"
+    ],
+    methods: 'GET, POST, PUT, DELETE, OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
+    credentials: true,
 }));
 
 app.use(bodyParser.json({ limit: '50mb' }));  // Increase the limit as needed
