@@ -19,7 +19,7 @@ const app = express();
 app.use(compression());
 // Allow all origins (or specify specific origins if needed)
 app.use(cors({
-    origin: ["https://ev4palms.vercel.app", "http://localhost:3100", "http://localhost:3000", "https://www.ditn-palmco.my.id", "https://picatekpol.my.id", "https://investasi-tanaman.ptpn4.co.id"], // Frontend origins
+    origin: ["https://ev4palms.vercel.app", "http://localhost:3100", "https://www.ditn-palmco.my.id", "https://picatekpol.my.id", "https://www.ptpn4.co.id", "https://www.investasi-tanaman.ptpn4.co.id", "https://investasi-tanaman.ptpn4.co.id", "https://ptpn4.co.id"], // Replace with your frontend URL
     methods: 'GET, POST, PUT, DELETE, OPTIONS', // Allowed methods
     allowedHeaders: 'Content-Type, Authorization, X-Requested-With', // Allowed headers
     credentials: true, // If you need cookies to be included in requests
