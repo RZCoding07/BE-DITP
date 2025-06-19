@@ -10,29 +10,36 @@ import routerImmature from './routes/immature.js';
 import routerMaster from './routes/master.js';
 import { rateLimit } from 'express-rate-limit'
 import compression from "compression";
-import Areal from './models/immature/ASModel.js';
-import WeeklyProgress from './models/immature/ProgressMingguanPICAModel.js';
+import hpp from 'hpp';
+import xss from 'xss-clean';
 import routerReplanting from './routes/replanting.js';
 dotenv.config();
 
 const app = express();
+
+app.use(xss());
+app.use(hpp());
 app.use(compression());
-// Allow all origins (or specify specific origins if needed)
-app.use(cors({
-    origin: [
-        "https://ev4palms.vercel.app",
-        "http://localhost:3100",
-        "https://www.ditn-palmco.my.id",
-        "https://picatekpol.my.id",
-        "https://ptpn4.co.id",
-        "https://www.ptpn4.co.id",
-        "https://www.investasi-tanaman.ptpn4.co.id",
-        "https://investasi-tanaman.ptpn4.co.id"
-    ],
-    methods: 'GET, POST, PUT, DELETE, OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
-    credentials: true,
-}));
+app.options('*', cors()); 
+
+const corsOptions = {
+  origin: [
+    "https://ev4palms.vercel.app",
+    "http://localhost:3100",
+    "https://www.ditn-palmco.my.id",
+    "https://picatekpol.my.id",
+    "https://ptpn4.co.id",
+    "https://www.ptpn4.co.id",
+    "https://www.investasi-tanaman.ptpn4.co.id",
+    "https://investasi-tanaman.ptpn4.co.id"
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  optionsSuccessStatus: 200 // Beberapa browser memerlukan ini
+};
+app.use(cors(corsOptions));
+
 
 app.use(bodyParser.json({ limit: '50mb' }));  // Increase the limit as needed
 app.use(helmet());  // Security middleware
@@ -94,13 +101,18 @@ app.use('/api-master', routerMaster);
 app.use('/api-replanting', routerReplanting);
 
 
-app.use((err, req, res, next) => {
-    console.error('Error occurred:', err);
-    res.status(err.status || 500).json({
-        error: {
-            message: err.message || 'Internal Server Error'
-        }
-    });
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (corsOptions.origin.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
 });
 
 const limiter = rateLimit({
