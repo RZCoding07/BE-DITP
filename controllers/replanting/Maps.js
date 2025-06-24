@@ -1,25 +1,26 @@
-import Ckebun from '../../models/replanting/MapsModel.js';
-import NodeCache from 'node-cache';
-import axios from 'axios';
-import FormData from 'form-data';
+import Ckebun from "../../models/replanting/MapsModel.js";
+import NodeCache from "node-cache";
+import axios from "axios";
+import FormData from "form-data";
 
 // Cache configuration
 const cache = new NodeCache({
   stdTTL: 300,
   checkperiod: 60,
-  useClones: false
+  useClones: false,
 });
 
-const externalApiUrl = process.env.EXTERNAL_API_URL || "https://picatekpol.my.id";
+const externalApiUrl =
+  process.env.EXTERNAL_API_URL || "https://picatekpol.my.id";
 
 // Helper function to generate cache keys
 const generateCacheKey = (prefix, params) => {
   return `${prefix}_${JSON.stringify(params)}`;
 };
 
-export const getAllKordinatkebun = async (req, res) => {   
-  const cacheKey = 'AllCkebun';
-  
+export const getAllKordinatkebun = async (req, res) => {
+  const cacheKey = "AllCkebun";
+
   try {
     // Check cache first
     const cachedData = cache.get(cacheKey);
@@ -39,11 +40,14 @@ export const getAllKordinatkebun = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 export const fetchRegionals = async (req, res) => {
   const { dari_tanggal, sampai_tanggal } = req.body;
-  const cacheKey = generateCacheKey('regionals', { dari_tanggal, sampai_tanggal });
+  const cacheKey = generateCacheKey("regionals", {
+    dari_tanggal,
+    sampai_tanggal,
+  });
 
   try {
     // Check cache first
@@ -54,8 +58,8 @@ export const fetchRegionals = async (req, res) => {
 
     // Create form-data
     const form = new FormData();
-    form.append('dari_tanggal', dari_tanggal);
-    form.append('sampai_tanggal', sampai_tanggal);
+    form.append("dari_tanggal", dari_tanggal);
+    form.append("sampai_tanggal", sampai_tanggal);
 
     // Fetch from external API
     const response = await axios.post(
@@ -73,8 +77,8 @@ export const fetchRegionals = async (req, res) => {
 };
 
 export const fetchKebuns = async (req, res) => {
-  const { region  } = req.body;
-  const cacheKey = generateCacheKey('kebuns', { region });
+  const { region } = req.body;
+  const cacheKey = generateCacheKey("kebuns", { region });
 
   try {
     // Check cache first
@@ -89,7 +93,7 @@ export const fetchKebuns = async (req, res) => {
 
     // Create form-data
     const form = new FormData();
-    form.append('region', region);
+    form.append("region", region);
 
     // Fetch from external API
     const response = await axios.post(
@@ -111,15 +115,17 @@ export const fetchAfdelings = async (req, res) => {
 
   try {
     if (!regional || !kode_unit) {
-      return res.status(400).json({ message: "Regional code and kode unit are required" });
+      return res
+        .status(400)
+        .json({ message: "Regional code and kode unit are required" });
     }
 
     // Create form-data
     const form = new FormData();
-    form.append('dari_tanggal', dari_tanggal);
-    form.append('sampai_tanggal', sampai_tanggal);
-    form.append('regional', regional);
-    form.append('kode_unit', kode_unit);
+    form.append("dari_tanggal", dari_tanggal);
+    form.append("sampai_tanggal", sampai_tanggal);
+    form.append("regional", regional);
+    form.append("kode_unit", kode_unit);
 
     // Fetch from external API
     const response = await axios.post(
@@ -135,9 +141,36 @@ export const fetchAfdelings = async (req, res) => {
   }
 };
 
-export const fetchMonitoringUnit = async (req, res) => {
+export const fetchDetail = async (req, res) => {
+  const { start_date, end_date } = req.body;
+
+  try {
+    // Create form-data
+    const form = new FormData();
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/api/d-monev-detail`,
+      form,
+      { headers: form.getHeaders() }
+    );
+
+    const responseData = response.data?.data || response.data;
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const fetchMonitoringRegional = async (req, res) => {
   const { start_date, end_date, region } = req.body;
-  const cacheKey = generateCacheKey('monitoring_unit', { start_date, end_date, region });
+  const cacheKey = generateCacheKey("monitoring_regional", {
+    start_date,
+    end_date,
+    region,
+  });
 
   try {
     // Check cache first
@@ -148,9 +181,44 @@ export const fetchMonitoringUnit = async (req, res) => {
 
     // Create form-data
     const form = new FormData();
-    form.append('start_date', start_date);
-    form.append('end_date', end_date);
-    form.append('region', region);
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/api/d-rekap-regional`,
+      form,
+      { headers: form.getHeaders() }
+    );
+
+    const responseData = response.data?.data || response.data;
+    cache.set(cacheKey, responseData);
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const fetchMonitoringUnit = async (req, res) => {
+  const { start_date, end_date, region } = req.body;
+  const cacheKey = generateCacheKey("monitoring_unit", {
+    start_date,
+    end_date,
+    region,
+  });
+
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    // Create form-data
+    const form = new FormData();
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+    form.append("region", region);
 
     // Fetch from external API
     const response = await axios.post(
@@ -167,9 +235,50 @@ export const fetchMonitoringUnit = async (req, res) => {
   }
 };
 
-export const fetchCorrectiveAction = async (req, res) => {
-  const { start_date, end_date, region } = req.body;
-  const cacheKey = generateCacheKey('corrective_action', { start_date, end_date, region });
+export const fetchMonitoringAfdeling = async (req, res) => {
+  const { start_date, end_date, region, kode_unit } = req.body;
+  const cacheKey = generateCacheKey("monitoring_afdeling", {
+    start_date,
+    end_date,
+    region,
+    kode_unit,
+  });
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+    // Create form-data
+    const form = new FormData();
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+    form.append("region", region);
+    form.append("kode_unit", kode_unit);
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/api/d-rekap-afdeling`,
+      form,
+      { headers: form.getHeaders() }
+    );
+    const responseData = response.data?.data || response.data;
+    cache.set(cacheKey, responseData);
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+      details: error.response?.data || "No additional error details",
+    });
+  }
+};
+
+export const fetchCorrectiveActionRegional = async (req, res) => {
+  const { start_date, end_date } = req.body;
+  const cacheKey = generateCacheKey("corrective_action", {
+    start_date,
+    end_date,
+  });
 
   try {
     // Check cache first
@@ -180,9 +289,44 @@ export const fetchCorrectiveAction = async (req, res) => {
 
     // Create form-data
     const form = new FormData();
-    form.append('start_date', start_date);
-    form.append('end_date', end_date);
-    form.append('region', region);
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/api/d-rekap-ca-region`,
+      form,
+      { headers: form.getHeaders() }
+    );
+
+    const responseData = response.data?.data || response.data;
+    cache.set(cacheKey, responseData);
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const fetchCorrectiveActionKebun = async (req, res) => {
+  const { start_date, end_date, region } = req.body;
+  const cacheKey = generateCacheKey("corrective_action", {
+    start_date,
+    end_date,
+    region,
+  });
+
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    // Create form-data
+    const form = new FormData();
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+    form.append("region", region);
 
     // Fetch from external API
     const response = await axios.post(
@@ -199,15 +343,13 @@ export const fetchCorrectiveAction = async (req, res) => {
   }
 };
 
-export const fetchJobPosition = async (req, res) => {
-  const { start_date, end_date, region, kode_unit, afdeling, blok } = req.body;
-  const cacheKey = generateCacheKey('job_position', { 
-    start_date, 
-    end_date, 
-    region, 
-    kode_unit, 
-    afdeling, 
-    blok 
+export const fetchCorrectiveActionAfdeling = async (req, res) => {
+  const { start_date, end_date, region, kode_unit } = req.body;
+  const cacheKey = generateCacheKey("corrective_action", {
+    start_date,
+    end_date,
+    region,
+    kode_unit,
   });
 
   try {
@@ -219,12 +361,127 @@ export const fetchJobPosition = async (req, res) => {
 
     // Create form-data
     const form = new FormData();
-    form.append('start_date', start_date);
-    form.append('end_date', end_date);
-    if (region) form.append('region', region);
-    if (kode_unit) form.append('kode_unit', kode_unit);
-    if (afdeling) form.append('afdeling', afdeling);
-    if (blok) form.append('blok', blok);
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+    form.append("region", region);
+    form.append("kode_unit", kode_unit);
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/api/d-rekap-ca-afdeling`,
+      form,
+      { headers: form.getHeaders() }
+    );
+
+    const responseData = response.data?.data || response.data;
+    cache.set(cacheKey, responseData);
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// d-monev-delete-detail
+
+export const fetchDeleteMonevDetail = async (req, res) => {
+  const { monev_id } = req.body;
+
+  try {
+    if (!monev_id) {
+      return res.status(400).json({ message: "Monev ID is required" });
+    }
+
+    // Create form-data
+    const form = new FormData();
+    form.append("monev_id", monev_id);
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/api/d-monev-delete-detail`,
+      form,
+      { headers: form.getHeaders() }
+    );
+
+    const responseData = response.data?.data || response.data;
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const fetchDetailMonevDetail = async (req, res) => {
+  const { id } = req.params;
+  
+  // Validasi input
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ message: 'ID harus berupa angka' });
+  }
+
+  try {
+    // Konfigurasi headers
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex',
+      // Tambahkan header CORS jika diperlukan
+      'Access-Control-Allow-Origin': '*'
+    };
+
+    // Gunakan GET request jika endpoint memang GET
+    const response = await axios.get(
+      `https://ess.ptpn4.co.id/api/v1/monitoring-evaluasi/${id}/show`,
+      { headers }
+    );
+
+    // Handle response
+    const responseData = response.data?.data || response.data;
+    
+    // Tambahkan header CORS di response proxy Anda
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.status(200).json({
+      success: true,
+      data: responseData
+    });
+    
+  } catch (error) {
+    console.error('Error fetching detail:', error);
+    
+    // Handle error response dari API eksternal
+    const statusCode = error.response?.status || 500;
+    const errorMessage = error.response?.data?.message || error.message;
+    
+    res.status(statusCode).json({
+      success: false,
+      message: errorMessage
+    });
+  }
+};
+export const fetchJobPosition = async (req, res) => {
+  const { start_date, end_date, region, kode_unit, afdeling, blok } = req.body;
+  const cacheKey = generateCacheKey("job_position", {
+    start_date,
+    end_date,
+    region,
+    kode_unit,
+    afdeling,
+    blok,
+  });
+
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    // Create form-data
+    const form = new FormData();
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+    if (region) form.append("region", region);
+    if (kode_unit) form.append("kode_unit", kode_unit);
+    if (afdeling) form.append("afdeling", afdeling);
+    if (blok) form.append("blok", blok);
 
     // Fetch from external API
     const response = await axios.post(
@@ -237,26 +494,25 @@ export const fetchJobPosition = async (req, res) => {
     cache.set(cacheKey, responseData);
     res.status(200).json(responseData);
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message,
-      details: error.response?.data || 'No additional error details' 
+      details: error.response?.data || "No additional error details",
     });
   }
 };
 
-
 export const clearCache = async (req, res) => {
   try {
     const { pattern } = req.query;
-    
+
     if (pattern) {
       const keys = cache.keys();
-      const matchingKeys = keys.filter(key => key.includes(pattern));
-      matchingKeys.forEach(key => cache.del(key));
-      
+      const matchingKeys = keys.filter((key) => key.includes(pattern));
+      matchingKeys.forEach((key) => cache.del(key));
+
       res.status(200).json({
         message: `Cleared ${matchingKeys.length} cache entries`,
-        clearedKeys: matchingKeys
+        clearedKeys: matchingKeys,
       });
     } else {
       cache.flushAll();
@@ -271,11 +527,11 @@ export const getCacheStats = async (req, res) => {
   try {
     const stats = cache.getStats();
     const keys = cache.keys();
-    
+
     res.status(200).json({
       ...stats,
       totalKeys: keys.length,
-      keys: keys
+      keys: keys,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

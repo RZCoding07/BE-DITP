@@ -9,10 +9,17 @@ import {
   fetchKebuns,
   fetchAfdelings,
   fetchMonitoringUnit,
-  fetchCorrectiveAction,
   clearCache,
   getCacheStats,
-  fetchJobPosition
+  fetchJobPosition,
+  fetchMonitoringRegional,
+  fetchMonitoringAfdeling,
+  fetchCorrectiveActionRegional,
+  fetchCorrectiveActionKebun,
+  fetchCorrectiveActionAfdeling,
+  fetchDetail,
+  fetchDeleteMonevDetail,
+  fetchDetailMonevDetail
 } from "../controllers/replanting/Maps.js";
 
 const routerReplanting = express.Router();
@@ -27,9 +34,22 @@ routerReplanting.get('/koordinat-kebun', getAllKordinatkebun);
 routerReplanting.post('/api/d-monev-reg', fetchRegionals);
 routerReplanting.post('/api/d-monev-kebun', fetchKebuns);
 routerReplanting.post('/api/d-monev-afd', fetchAfdelings);
-routerReplanting.post('/api/d-rekap-unit', fetchMonitoringUnit);
 
-routerReplanting.post('/api/d-rekap-ca-unit', fetchCorrectiveAction);
+
+routerReplanting.post('/api/d-monev-detail', fetchDetail);
+
+routerReplanting.post('/api/d-rekap-regional', fetchMonitoringRegional);
+routerReplanting.post('/api/d-rekap-unit', fetchMonitoringUnit);
+routerReplanting.post('/api/d-rekap-afd', fetchMonitoringAfdeling);
+
+// Corrective action routes
+
+routerReplanting.post('/api/d-rekap-ca-regional', fetchCorrectiveActionRegional);
+routerReplanting.post('/api/d-rekap-ca-unit', fetchCorrectiveActionKebun);
+routerReplanting.post('/api/d-rekap-ca-afd', fetchCorrectiveActionAfdeling);
+routerReplanting.post('/api/d-monev-delete-detail', fetchDeleteMonevDetail);
+routerReplanting.get('/api/monitoring-evaluasi/:id', fetchDetailMonevDetail);
+
 routerReplanting.post('/api/d-rekap-jabatan', fetchJobPosition);
 // Cache management routes
 routerReplanting.get('/cache/clear', clearCache);
