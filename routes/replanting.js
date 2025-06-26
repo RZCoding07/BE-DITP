@@ -19,7 +19,9 @@ import {
   fetchCorrectiveActionAfdeling,
   fetchDetail,
   fetchDeleteMonevDetail,
-  fetchDetailMonevDetail
+  fetchDetailMonevDetail,
+  fetchDetailBelumMonev,
+  fetchRekapKaryawanBelumMonev
 } from "../controllers/replanting/Maps.js";
 
 const routerReplanting = express.Router();
@@ -48,6 +50,8 @@ routerReplanting.post('/api/d-rekap-ca-regional', fetchCorrectiveActionRegional)
 routerReplanting.post('/api/d-rekap-ca-unit', fetchCorrectiveActionKebun);
 routerReplanting.post('/api/d-rekap-ca-afd', fetchCorrectiveActionAfdeling);
 routerReplanting.post('/api/d-monev-delete-detail', fetchDeleteMonevDetail);
+
+routerReplanting.post('/api/d-rekap-karyawan-belum-monev', fetchRekapKaryawanBelumMonev);
 routerReplanting.get('/api/monitoring-evaluasi/:id', fetchDetailMonevDetail);
 
 routerReplanting.post('/api/d-rekap-jabatan', fetchJobPosition);

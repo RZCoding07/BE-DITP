@@ -343,6 +343,43 @@ export const fetchCorrectiveActionKebun = async (req, res) => {
   }
 };
 
+
+export const fetchRekapBlokTU = async (req, res) => {
+  const { start_date, end_date, region } = req.body;
+  const cacheKey = generateCacheKey("rekap_blok_tu", {
+    start_date,
+    end_date,
+    region,
+  });
+
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    // Create form-data
+    const form = new FormData();
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+    form.append("region", region);
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/api/d-rekap-blok-tu`,
+      form,
+      { headers: form.getHeaders() }
+    );
+
+    const responseData = response.data?.data || response.data;
+    cache.set(cacheKey, responseData);
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const fetchCorrectiveActionAfdeling = async (req, res) => {
   const { start_date, end_date, region, kode_unit } = req.body;
   const cacheKey = generateCacheKey("corrective_action", {
@@ -456,6 +493,73 @@ export const fetchDetailMonevDetail = async (req, res) => {
     });
   }
 };
+
+
+
+export const fetchDetailBelumMonev = async (req, res) => {
+  const { start_date, end_date, region } = req.body;
+  try {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex',
+      'Access-Control-Allow-Origin': '*'
+    };
+
+    // POST request untuk ambil seluruh data karyawan belum monev
+    const response = await axios.post(
+      `https://ess.ptpn4.co.id/api/v1/d-rekap-karyawan-belum-monev`,
+      {
+        start_date,
+        end_date,
+        region
+      },
+      { headers }
+    );
+
+    const list = response.data?.data || [];
+
+    // Cari data berdasarkan SAP (ID)
+    const found = list.find((item) => item.sap === id);
+
+    if (!found) {
+      return res.status(404).json({ success: false, message: 'Data tidak ditemukan' });
+    }
+
+    // Hanya kembalikan field yang diperlukan
+    const filtered = {
+      sap: found.sap,
+      name: found.name,
+      desc_personnel_area: found.desc_personnel_area,
+      personnel_subarea: found.personnel_subarea,
+      desc_personnel_subarea: found.desc_personnel_subarea,
+      org_unit: found.org_unit,
+      desc_org_unit: found.desc_org_unit,
+      employee_group: found.employee_group,
+      desc_employee_group: found.desc_employee_group,
+      position: found.position,
+      desc_position: found.desc_position,
+      job: found.job,
+      desc_job: found.desc_job,
+      level: found.level,
+      work_start_date: found.work_start_date,
+      phdp_gol: found.phdp_gol,
+      person_grade: found.person_grade,
+      region: found.region,
+      subregion: found.subregion,
+    };
+
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST');
+    return res.status(200).json({ success: true, data: filtered });
+
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    const statusCode = error.response?.status || 500;
+    const errorMessage = error.response?.data?.message || error.message;
+    return res.status(statusCode).json({ success: false, message: errorMessage });
+  }
+};
+
 export const fetchJobPosition = async (req, res) => {
   const { start_date, end_date, region, kode_unit, afdeling, blok } = req.body;
   const cacheKey = generateCacheKey("job_position", {
@@ -537,3 +641,112 @@ export const getCacheStats = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const fetchRekapKaryawanBelumMonev = async (req, res) => {
+  const { start_date, end_date, region } = req.body;
+  const cacheKey = generateCacheKey("rekap_karyawan_belum_monev", {
+    start_date,
+    end_date,
+    region,
+  });
+
+  try {
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    const form = new FormData();
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+    form.append("region", region);
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex',
+      'Access-Control-Allow-Origin': '*'
+    };
+
+    // POST request untuk ambil seluruh data karyawan belum monev
+    const response = await axios.post(
+      `https://ess.ptpn4.co.id/api/v1/d-rekap-karyawan-belum-monev`,
+      {
+        start_date,
+        end_date,
+        region
+      },
+      { headers }
+    );
+
+    const responseData = response.data?.data || response.data;
+
+    // Normalize desc_org_unit berdasarkan desc_cost_center
+    const processedData = responseData.map((item) => {
+      const afdNumber = extractAfdFromCostCenter(item.desc_cost_center);
+      const afdFormatted = afdNumber ? `AFD${afdNumber.toString().padStart(2, '0')}` : item.desc_org_unit;
+      
+      return {
+        ...item,
+        desc_org_unit: afdFormatted,
+      };
+    });
+
+    cache.set(cacheKey, processedData);
+    res.status(200).json(processedData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Fungsi untuk mengekstrak nomor AFD dari desc_cost_center
+function extractAfdFromCostCenter(costCenterDesc) {
+  if (!costCenterDesc) return null;
+  
+  // Mencocokkan pola seperti "AFD 01", "AFD 02", dll
+  const afdRegex = /AFD\s*(\d{2})/i;
+  const match = costCenterDesc.match(afdRegex);
+  
+  if (match && match[1]) {
+    return parseInt(match[1], 10);
+  }
+  
+  return null;
+}
+
+// --- AFD Normalization Utilities ---
+
+function normalizeAfd(entry) {
+  const afdRegex = `/AFDELING\s+([IVXLCDM]+|\d+)(?:\s+|$)/i`;
+  const afdShortRegex = `/AFD\s*[- ]\s*([IVXLCDM]+|\d+)(?:\s+|$)/i`;
+
+  const match = entry.match(afdRegex) || entry.match(afdShortRegex);
+  if (match) {
+    const number = match[1];
+    let num;
+    if (/^[IVXLCDM]+$/i.test(number)) {
+      num = romanToInt(number.toUpperCase());
+    } else {
+      num = parseInt(number, 10);
+    }
+
+    if (!isNaN(num)) {
+      return `AFD${num.toString().padStart(2, '0')}`;
+    }
+  }
+
+  return null;
+}
+
+function romanToInt(roman) {
+  const values = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+  let total = 0;
+  let previous = 0;
+
+  for (let i = roman.length - 1; i >= 0; i--) {
+    const current = values[roman[i]];
+    total += current < previous ? -current : current;
+    previous = current;
+  }
+
+  return total;
+}
