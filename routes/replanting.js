@@ -21,7 +21,8 @@ import {
   fetchDeleteMonevDetail,
   fetchDetailMonevDetail,
   fetchDetailBelumMonev,
-  fetchRekapKaryawanBelumMonev
+  fetchRekapKaryawanBelumMonev,
+  fetchMonev
 } from "../controllers/replanting/Maps.js";
 
 const routerReplanting = express.Router();
@@ -52,6 +53,9 @@ routerReplanting.post('/api/d-rekap-ca-afd', fetchCorrectiveActionAfdeling);
 routerReplanting.post('/api/d-monev-delete-detail', fetchDeleteMonevDetail);
 
 routerReplanting.post('/api/d-rekap-karyawan-belum-monev', fetchRekapKaryawanBelumMonev);
+routerReplanting.post('/api/d-rekap-blok-tu-dev', fetchMonev);
+
+
 routerReplanting.get('/api/monitoring-evaluasi/:id', fetchDetailMonevDetail);
 
 routerReplanting.post('/api/d-rekap-jabatan', fetchJobPosition);

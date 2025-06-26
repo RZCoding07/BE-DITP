@@ -343,7 +343,6 @@ export const fetchCorrectiveActionKebun = async (req, res) => {
   }
 };
 
-
 export const fetchRekapBlokTU = async (req, res) => {
   const { start_date, end_date, region } = req.body;
   const cacheKey = generateCacheKey("rekap_blok_tu", {
@@ -382,7 +381,7 @@ export const fetchRekapBlokTU = async (req, res) => {
 
 export const fetchCorrectiveActionAfdeling = async (req, res) => {
   const { start_date, end_date, region, kode_unit } = req.body;
-  const cacheKey = generateCacheKey("corrective_action", {
+  const cacheKey = generateCacheKey("corrective_action_afdeling", {
     start_date,
     end_date,
     region,
@@ -448,19 +447,19 @@ export const fetchDeleteMonevDetail = async (req, res) => {
 
 export const fetchDetailMonevDetail = async (req, res) => {
   const { id } = req.params;
-  
+
   // Validasi input
   if (!id || isNaN(id)) {
-    return res.status(400).json({ message: 'ID harus berupa angka' });
+    return res.status(400).json({ message: "ID harus berupa angka" });
   }
 
   try {
     // Konfigurasi headers
     const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex',
+      "Content-Type": "application/json",
+      Authorization: "QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex",
       // Tambahkan header CORS jika diperlukan
-      'Access-Control-Allow-Origin': '*'
+      "Access-Control-Allow-Origin": "*",
     };
 
     // Gunakan GET request jika endpoint memang GET
@@ -471,38 +470,35 @@ export const fetchDetailMonevDetail = async (req, res) => {
 
     // Handle response
     const responseData = response.data?.data || response.data;
-    
+
     // Tambahkan header CORS di response proxy Anda
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET");
     res.status(200).json({
       success: true,
-      data: responseData
+      data: responseData,
     });
-    
   } catch (error) {
-    console.error('Error fetching detail:', error);
-    
+    console.error("Error fetching detail:", error);
+
     // Handle error response dari API eksternal
     const statusCode = error.response?.status || 500;
     const errorMessage = error.response?.data?.message || error.message;
-    
+
     res.status(statusCode).json({
       success: false,
-      message: errorMessage
+      message: errorMessage,
     });
   }
 };
-
-
 
 export const fetchDetailBelumMonev = async (req, res) => {
   const { start_date, end_date, region } = req.body;
   try {
     const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex',
-      'Access-Control-Allow-Origin': '*'
+      "Content-Type": "application/json",
+      Authorization: "QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex",
+      "Access-Control-Allow-Origin": "*",
     };
 
     // POST request untuk ambil seluruh data karyawan belum monev
@@ -511,7 +507,7 @@ export const fetchDetailBelumMonev = async (req, res) => {
       {
         start_date,
         end_date,
-        region
+        region,
       },
       { headers }
     );
@@ -522,7 +518,9 @@ export const fetchDetailBelumMonev = async (req, res) => {
     const found = list.find((item) => item.sap === id);
 
     if (!found) {
-      return res.status(404).json({ success: false, message: 'Data tidak ditemukan' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Data tidak ditemukan" });
     }
 
     // Hanya kembalikan field yang diperlukan
@@ -548,15 +546,16 @@ export const fetchDetailBelumMonev = async (req, res) => {
       subregion: found.subregion,
     };
 
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST');
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "POST");
     return res.status(200).json({ success: true, data: filtered });
-
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error("Error fetching data:", error);
     const statusCode = error.response?.status || 500;
     const errorMessage = error.response?.data?.message || error.message;
-    return res.status(statusCode).json({ success: false, message: errorMessage });
+    return res
+      .status(statusCode)
+      .json({ success: false, message: errorMessage });
   }
 };
 
@@ -662,9 +661,9 @@ export const fetchRekapKaryawanBelumMonev = async (req, res) => {
     form.append("region", region);
 
     const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex',
-      'Access-Control-Allow-Origin': '*'
+      "Content-Type": "application/json",
+      Authorization: "QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex",
+      "Access-Control-Allow-Origin": "*",
     };
 
     // POST request untuk ambil seluruh data karyawan belum monev
@@ -673,7 +672,7 @@ export const fetchRekapKaryawanBelumMonev = async (req, res) => {
       {
         start_date,
         end_date,
-        region
+        region,
       },
       { headers }
     );
@@ -683,8 +682,10 @@ export const fetchRekapKaryawanBelumMonev = async (req, res) => {
     // Normalize desc_org_unit berdasarkan desc_cost_center
     const processedData = responseData.map((item) => {
       const afdNumber = extractAfdFromCostCenter(item.desc_cost_center);
-      const afdFormatted = afdNumber ? `AFD${afdNumber.toString().padStart(2, '0')}` : item.desc_org_unit;
-      
+      const afdFormatted = afdNumber
+        ? `AFD${afdNumber.toString().padStart(2, "0")}`
+        : item.desc_org_unit;
+
       return {
         ...item,
         desc_org_unit: afdFormatted,
@@ -701,15 +702,15 @@ export const fetchRekapKaryawanBelumMonev = async (req, res) => {
 // Fungsi untuk mengekstrak nomor AFD dari desc_cost_center
 function extractAfdFromCostCenter(costCenterDesc) {
   if (!costCenterDesc) return null;
-  
+
   // Mencocokkan pola seperti "AFD 01", "AFD 02", dll
   const afdRegex = /AFD\s*(\d{2})/i;
   const match = costCenterDesc.match(afdRegex);
-  
+
   if (match && match[1]) {
     return parseInt(match[1], 10);
   }
-  
+
   return null;
 }
 
@@ -730,7 +731,7 @@ function normalizeAfd(entry) {
     }
 
     if (!isNaN(num)) {
-      return `AFD${num.toString().padStart(2, '0')}`;
+      return `AFD${num.toString().padStart(2, "0")}`;
     }
   }
 
@@ -750,3 +751,48 @@ function romanToInt(roman) {
 
   return total;
 }
+
+export const fetchMonev = async (req, res) => {
+  const { start_date, end_date, region, kode_unit, afdeling } = req.body;
+  const cacheKey = generateCacheKey("monev", {
+    start_date,
+    end_date,
+    region,
+    kode_unit,
+    afdeling
+  });
+
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: "QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex",
+      "Access-Control-Allow-Origin": "*",
+    };
+``
+    // POST request untuk ambil seluruh data karyawan belum monev
+    const response = await axios.post(
+      `https://ess.ptpn4.co.id/api/v1/d-rekap-blok-tu`,
+      {
+        start_date,
+        end_date,
+        region,
+        kode_unit,
+        afdeling
+      },
+      { headers }
+    );
+
+    const responseData = response.data?.data || response.data;
+
+    cache.set(cacheKey, responseData);
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
