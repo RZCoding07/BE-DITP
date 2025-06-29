@@ -78,7 +78,7 @@ export const fetchRegionals = async (req, res) => {
 
 export const fetchKebuns = async (req, res) => {
   const { region } = req.body;
-  const cacheKey = generateCacheKey("kebuns", { region });
+  const cacheKey = generateCacheKey("kebuns", { region: region || "all" }); // gunakan "all" jika kosong
 
   try {
     // Check cache first
@@ -87,13 +87,11 @@ export const fetchKebuns = async (req, res) => {
       return res.status(200).json(cachedData);
     }
 
-    if (!region) {
-      return res.status(400).json({ message: "Regional code is required" });
-    }
-
-    // Create form-data
+    // Buat form-data
     const form = new FormData();
-    form.append("region", region);
+    if (region) {
+      form.append("region", region); // hanya append jika region ada
+    }
 
     // Fetch from external API
     const response = await axios.post(
@@ -109,6 +107,7 @@ export const fetchKebuns = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const fetchAfdelings = async (req, res) => {
   const { dari_tanggal, sampai_tanggal, regional, kode_unit } = req.body;
@@ -158,6 +157,40 @@ export const fetchDetail = async (req, res) => {
     );
 
     const responseData = response.data?.data || response.data;
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const fetchMonitoringPalmco = async (req, res) => {
+  const { start_date, end_date } = req.body;
+  const cacheKey = generateCacheKey("monitoring_palmco", {
+    start_date,
+    end_date,
+  });
+
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    // Create form-data
+    const form = new FormData();
+    form.append("start_date", start_date);
+    form.append("end_date", end_date);
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/api/d-rekap-palmco`,
+      form,
+      { headers: form.getHeaders() }
+    );
+
+    const responseData = response.data?.data || response.data;
+    cache.set(cacheKey, responseData);
     res.status(200).json(responseData);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -679,17 +712,28 @@ export const fetchRekapKaryawanBelumMonev = async (req, res) => {
 
     const responseData = response.data?.data || response.data;
 
-    // Normalize desc_org_unit berdasarkan desc_cost_center
+    // Normalize desc_org_unit
     const processedData = responseData.map((item) => {
-      const afdNumber = extractAfdFromCostCenter(item.desc_cost_center);
-      const afdFormatted = afdNumber
-        ? `AFD${afdNumber.toString().padStart(2, "0")}`
-        : item.desc_org_unit;
+      // First try to extract AFD from cost center
+      const afdFromCostCenter = extractAfdFromCostCenter(item.desc_cost_center);
+      if (afdFromCostCenter) {
+        return {
+          ...item,
+          desc_org_unit: `AFD${afdFromCostCenter.toString().padStart(2, "0")}`,
+        };
+      }
 
-      return {
-        ...item,
-        desc_org_unit: afdFormatted,
-      };
+      // If not found in cost center, try to normalize the org unit description
+      const normalizedAfd = normalizeAfd(item.desc_org_unit);
+      if (normalizedAfd) {
+        return {
+          ...item,
+          desc_org_unit: normalizedAfd,
+        };
+      }
+
+      // If no normalization possible, return original
+      return item;
     });
 
     cache.set(cacheKey, processedData);
@@ -714,16 +758,18 @@ function extractAfdFromCostCenter(costCenterDesc) {
   return null;
 }
 
-// --- AFD Normalization Utilities ---
+// Normalize AFD description from org unit
+function normalizeAfd(desc) {
+  if (!desc) return null;
 
-function normalizeAfd(entry) {
-  const afdRegex = `/AFDELING\s+([IVXLCDM]+|\d+)(?:\s+|$)/i`;
-  const afdShortRegex = `/AFD\s*[- ]\s*([IVXLCDM]+|\d+)(?:\s+|$)/i`;
+  const afdRegex = /(?:AFDELING|AFD)[\s\-]*([IVXLCDM]+|\d+)/i;
+  const match = desc.match(afdRegex);
 
-  const match = entry.match(afdRegex) || entry.match(afdShortRegex);
-  if (match) {
+  if (match && match[1]) {
     const number = match[1];
     let num;
+
+    // Check if roman numeral
     if (/^[IVXLCDM]+$/i.test(number)) {
       num = romanToInt(number.toUpperCase());
     } else {
@@ -759,7 +805,7 @@ export const fetchMonev = async (req, res) => {
     end_date,
     region,
     kode_unit,
-    afdeling
+    afdeling,
   });
 
   try {
@@ -774,7 +820,7 @@ export const fetchMonev = async (req, res) => {
       Authorization: "QYsMhk5oo7KhtW4nrSpo3h51EEJZnDNtj5ss18Ex",
       "Access-Control-Allow-Origin": "*",
     };
-``
+    ``;
     // POST request untuk ambil seluruh data karyawan belum monev
     const response = await axios.post(
       `https://ess.ptpn4.co.id/api/v1/d-rekap-blok-tu`,
@@ -783,7 +829,7 @@ export const fetchMonev = async (req, res) => {
         end_date,
         region,
         kode_unit,
-        afdeling
+        afdeling,
       },
       { headers }
     );
