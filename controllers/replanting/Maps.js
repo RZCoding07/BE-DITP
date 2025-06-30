@@ -327,7 +327,7 @@ export const fetchCorrectiveActionRegional = async (req, res) => {
 
     // Fetch from external API
     const response = await axios.post(
-      `${externalApiUrl}/api/d-rekap-ca-region`,
+      `${externalApiUrl}/api/d-rekap-ca-blok`,
       form,
       { headers: form.getHeaders() }
     );
@@ -363,7 +363,7 @@ export const fetchCorrectiveActionKebun = async (req, res) => {
 
     // Fetch from external API
     const response = await axios.post(
-      `${externalApiUrl}/api/d-rekap-ca-unit`,
+      `${externalApiUrl}/api/d-rekap-ca-blok`,
       form,
       { headers: form.getHeaders() }
     );
