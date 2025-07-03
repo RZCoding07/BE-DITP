@@ -136,8 +136,7 @@ export const fetchAfdelings = async (req, res) => {
 }
 
 export const fetchDetail = async (req, res) => {
-  const { start_date, end_date } = req.body
-
+  const { start_date, end_date, region, kode_unit, afdeling, blok } = req.body
   try {
     // Fetch from external API
     const response = await axios.post(
@@ -145,6 +144,10 @@ export const fetchDetail = async (req, res) => {
       {
         start_date,
         end_date,
+        region,
+        kode_unit,
+        afdeling,
+        blok
       },
       { headers: getHeaders() },
     )
@@ -294,6 +297,43 @@ export const fetchMonitoringAfdeling = async (req, res) => {
   }
 }
 
+export const fetchCorrectiveActionDetail = async (req, res) => {
+  const { start_date, end_date, region, kode_unit, afdeling } = req.body
+  const cacheKey = generateCacheKey("corrective_action_detail", {
+    start_date,
+    end_date,
+    region,
+    kode_unit,
+    afdeling,
+  })
+
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey)
+    if (cachedData) {
+      return res.status(200).json(cachedData)
+    }
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/d-rekap-ca-detail`,
+      {
+        start_date,
+        end_date,
+        region,
+        kode_unit,
+        afdeling
+      },
+      { headers: getHeaders() },
+    )
+
+    const responseData = response.data?.data || response.data
+    cache.set(cacheKey, responseData)
+    res.status(200).json(responseData)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
 export const fetchCorrectiveActionRegional = async (req, res) => {
   const { start_date, end_date } = req.body
   const cacheKey = generateCacheKey("corrective_action", {

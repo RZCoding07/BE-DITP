@@ -23,7 +23,8 @@ import {
   fetchDetailBelumMonev,
   fetchRekapKaryawanBelumMonev,
   fetchMonev,
-  fetchMonitoringPalmco
+  fetchMonitoringPalmco,
+  fetchCorrectiveActionDetail
 } from "../controllers/replanting/Maps.js";
 
 const routerReplanting = express.Router();
@@ -48,6 +49,8 @@ routerReplanting.post('/api/d-rekap-unit', fetchMonitoringUnit);
 routerReplanting.post('/api/d-rekap-afd', fetchMonitoringAfdeling);
 
 // Corrective action routes
+
+routerReplanting.post('/api/d-rekap-ca-detail', fetchCorrectiveActionDetail);
 
 routerReplanting.post('/api/d-rekap-ca-regional', fetchCorrectiveActionRegional);
 routerReplanting.post('/api/d-rekap-ca-unit', fetchCorrectiveActionKebun);
