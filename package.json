@@ -9,7 +9,7 @@
     "dev": "nodemon app.js",
     "lint": "eslint --fix src",
     "test": "jest"
-  },
+  },  
   "author": "",
   "license": "ISC",
   "dependencies": {

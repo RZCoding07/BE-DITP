@@ -143,8 +143,8 @@ export const getAllPiCaCursor = async (req, res) => {
 
     // Execute count query
     const countResult = await db_immature.query(countQuery, {
-      replacements: countReplacements,
-      type: db_immature.QueryTypes.SELECT,
+    replacements: countReplacements,
+    type: db_immature.QueryTypes.SELECT,
     });
 
     const totalRows = countResult[0].total;

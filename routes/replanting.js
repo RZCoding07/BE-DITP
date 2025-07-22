@@ -24,7 +24,8 @@ import {
   fetchRekapKaryawanBelumMonev,
   fetchMonev,
   fetchMonitoringPalmco,
-  fetchCorrectiveActionDetail
+  fetchCorrectiveActionDetail,
+  fetchPi
 } from "../controllers/replanting/Maps.js";
 
 const routerReplanting = express.Router();
@@ -47,6 +48,7 @@ routerReplanting.post('/api/d-rekap-palmco', fetchMonitoringPalmco);
 routerReplanting.post('/api/d-rekap-regional', fetchMonitoringRegional);
 routerReplanting.post('/api/d-rekap-unit', fetchMonitoringUnit);
 routerReplanting.post('/api/d-rekap-afd', fetchMonitoringAfdeling);
+routerReplanting.post('/api/d-rekap-pi', fetchPi);
 
 // Corrective action routes
 

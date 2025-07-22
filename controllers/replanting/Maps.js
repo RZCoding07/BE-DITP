@@ -400,6 +400,45 @@ export const fetchCorrectiveActionKebun = async (req, res) => {
   }
 }
 
+
+export const fetchPi = async (req, res) => {
+  const { start_date, end_date, region, kebun, afdeling } = req.body
+  const cacheKey = generateCacheKey("pi_pekerjaan", {
+    start_date,
+    end_date,
+    region,
+    kebun,
+    afdeling
+  })
+
+  try {
+    // Check cache first
+    const cachedData = cache.get(cacheKey)
+    if (cachedData) {
+      return res.status(200).json(cachedData)
+    }
+
+    // Fetch from external API
+    const response = await axios.post(
+      `${externalApiUrl}/d-rekap-ca-pekerjaan`,
+      {
+        start_date,
+        end_date,
+        region,
+        kebun,
+        afdeling
+      },
+      { headers: getHeaders() },
+    )
+
+    const responseData = response.data?.data || response.data
+    cache.set(cacheKey, responseData)
+    res.status(200).json(responseData)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const fetchRekapBlokTU = async (req, res) => {
   const { start_date, end_date, region } = req.body
   const cacheKey = generateCacheKey("rekap_blok_tu", {

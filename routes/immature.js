@@ -26,7 +26,8 @@ import {
   getVwVegetatifById,
   getDistinctBulanVegetatif,
   bulkDeleteVegetatif,
-  getAllVegetatifProgress
+  getAllVegetatifProgress,
+  getRulesOfStandarisasiVegetatifDataset
 } from '../controllers/immature/Vegetatif.js';
 
 import {
@@ -211,6 +212,7 @@ routerImmature.get('/vegetatif-bulan-tahun/:bulan/:tahun', getVegetatifByBulanTa
 
 
 routerImmature.get('/interpolate', getRulesOfStandarisasiVegetatif);
+routerImmature.get('/interpolate-dataset', getRulesOfStandarisasiVegetatifDataset);
 
 routerImmature.get('/pica-all', getAllPiCaCursor);
 

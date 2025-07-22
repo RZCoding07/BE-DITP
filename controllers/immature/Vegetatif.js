@@ -334,6 +334,12 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
         // Process all required indices (0, 1, 8)
         const tinggiTanaman = interpolate(x_full, [1, ...x_values], [21, ...selectedDataset[0]]);
         const jumlahPelepah = interpolate(x_full, [1, ...x_values], [18, ...selectedDataset[1]]);
+        const panjangRachis = interpolate(x_full, [1, ...x_values], [3.5, ...selectedDataset[2]]);
+        const lebarPetiola = interpolate(x_full, [1, ...x_values], [2.5, ...selectedDataset[3]]);
+        const tebalPetiola = interpolate(x_full, [1, ...x_values], [1.5, ...selectedDataset[4]]);
+        const jumlahAnakDaun = interpolate(x_full, [1, ...x_values], [60, ...selectedDataset[5]]);
+        const panjangAnakDaun = interpolate(x_full, [1, ...x_values], [30, ...selectedDataset[6]]);
+        const lebarAnakDaun = interpolate(x_full, [1, ...x_values], [3.5, ...selectedDataset[7]]);
         const lingkarBatang = interpolate(x_full, [1, ...x_values], [48.5, ...selectedDataset[8]]);
 
         // Create response array
@@ -372,21 +378,70 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
                 };
             };
 
-            const formatKerapatanPokok = (value) => {
+            const formatPanjangRachis = (value) => {
                 const rounded = Math.round(value);
                 return {
-                    skor100: `${rounded} - ${rounded + 3}`,
-                    skor90: `${rounded - 10} - ${rounded - 1}`,
-                    skor80: `< ${rounded - 10}`.replace('\u003C', '<') // Ensure proper < character
+                    skor100: `>= ${rounded}`,
+                    skor90: `${rounded - 1} - ${rounded}`,
+                    skor80: `< ${rounded - 1}`.replace('\u003C', '<') // Ensure proper < character
                 };
-            };
+            }
 
+            const formatLebarPetiola = (value) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: `>= ${rounded}`,
+                    skor90: `${rounded - 0.5} - ${rounded}`,
+                    skor80: `< ${rounded - 0.5}`.replace('\u003C', '<') // Ensure proper < character
+                };
+            }
+
+            const formatTebalPetiola = (value) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: `>= ${rounded}`,
+                    skor90: `${rounded - 0.5} - ${rounded}`,
+                    skor80: `< ${rounded - 0.5}`.replace('\u003C', '<') // Ensure proper < character
+                };
+            }
+            const formatJumlahAnakDaun = (value) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: `>= ${rounded}`,
+                    skor90: `${rounded - 2} - ${rounded - 1}`,
+                    skor80: `< ${rounded - 2}`.replace('\u003C', '<') // Ensure proper < character
+                };
+            }
+
+            const formatPanjangAnakDaun = (value) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: `>= ${rounded}`,
+                    skor90: `${rounded - 2} - ${rounded - 1}`,
+                    skor80: `< ${rounded - 2}`.replace('\u003C', '<') // Ensure proper < character
+                };
+            }
+
+            const formatLebarAnakDaun = (value) => {
+                const rounded = Math.round(value);
+                return {
+                    skor100: `>= ${rounded}`,
+                    skor90: `${rounded - 0.5} - ${rounded}`,
+                    skor80: `< ${rounded - 0.5}`.replace('\u003C', '<') // Ensure proper < character
+                };
+            }
+            
             return {
                 fase,
                 umur,
                 lingkarBatang: formatLingkarBatang(lingkarBatang[umur - 1]),
                 jumlahPelepah: formatRange(jumlahPelepah[umur - 1], 18),
-                tinggiTanaman: formatTinggiTanaman(tinggiTanaman[umur - 1])
+                tinggiTanaman: formatTinggiTanaman(tinggiTanaman[umur - 1]),
+                lebarPetiola: formatLebarPetiola(lebarPetiola[umur - 1]),
+                tebalPetiola: formatTebalPetiola(tebalPetiola[umur - 1]),
+                jumlahAnakDaun: formatJumlahAnakDaun(jumlahAnakDaun[umur - 1]),
+                panjangAnakDaun: formatPanjangAnakDaun(panjangAnakDaun[umur - 1]),
+                lebarAnakDaun: formatLebarAnakDaun(lebarAnakDaun[umur - 1]),
             };
         });
 
@@ -401,6 +456,175 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
+    try {
+        const x_values = [6, 12, 18, 24, 30]; // Data umur asli
+        const datasets = [
+            [ [29.7, 69.7, 96.7, 134.2, 167.0], [20.7, 36.8, 40.0, 39.6, 56.0], [130.4, 218.9, 280.8, 319.8, 463.9], [2.3, 4.0, 4.1, 4.5, 5.3], [1.6, 2.9, 2.4, 2.7, 3.4], [56.7, 78.8, 102.0, 123.1, 124.0], [32.1, 56.5, 66.3, 72.7, 86.2], [3.0, 3.7, 3.5, 4.0, 4.5], [116.51, 150.0, 192.5, 235.0, 277.50] ],
+            [ [32.0, 64.0, 98.9, 133.2, 173.0], [18.9, 36.1, 39.7, 37.6, 52.0], [155.6, 220.5, 282.9, 342.9, 486.9], [2.5, 3.3, 4.2, 4.4, 5.1], [1.7, 2.3, 2.5, 2.5, 3.3], [55.0, 77.2, 96.0, 109.5, 119.0], [37.7, 54.9, 63.7, 76.5, 80.9], [3.4, 3.5, 3.8, 4.1, 4.5], [116.51, 150.0, 192.5, 235.0, 277.50] ],
+            [ [36.1, 65.9, 95.4, 134.5, 164.0], [23.3, 34.6, 40.2, 40.5, 52.0], [142.1, 208.3, 280.8, 337.0, 456.1], [2.3, 3.4, 4.2, 4.3, 5.0], [1.4, 2.4, 2.6, 3.1, 2.9], [60.2, 73.9, 96.4, 119.4, 123.0], [3.9, 55.0, 69.5, 74.2, 82.1], [2.8, 3.3, 3.6, 4.1, 4.1], [116.51, 150.0, 192.5, 235.0, 277.50] ],
+            [ [36.1, 65.9, 95.4, 134.5, 164.0], [23.3, 34.6, 40.2, 40.5, 52.0], [148, 182.5, null, 252.5, 289.5], [2.3, 3.4, 4.2, 4.3, 5.0], [1.4, 2.4, 2.6, 3.1, 2.9], [60.2, 73.9, 96.4, 119.4, 123.0], [3.9, 55.0, 69.5, 74.2, 82.1], [2.8, 3.3, 3.6, 4.1, 4.3], [116.51, 150.0, 192.5, 235.0, 277.50] ],
+            [ [29.7, 69.7, 96.7, 134.2, 167.0], [20.7, 36.8, 40.0, 39.6, 56.0], [140, 190, 240, 285, 340], [2.3, 4.0, 4.1, 4.5, 5.3], [1.6, 2.9, 2.4, 2.7, 3.4], [56.7, 78.8, 102.0, 123.1, 124.0], [32.1, 56.5, 66.3, 72.7, 86.2], [3.0, 3.7, 3.5, 4.0, 4.5], [116.51, 150.0, 192.5, 235.0, 277.50] ]
+        ];
+        const idx = parseInt(req.query.idx) || 1;
+
+        if (idx < 1 || idx > datasets.length) {
+            return res.status(400).json({ error: "Invalid dataset index" });
+        }
+
+        const selectedDataset = datasets[idx - 1];
+
+        // Polynomial regression function (quadratic)
+        const polynomialInterpolation = (x, knownX, knownY) => {
+            // Filter out null values
+            const validPoints = knownX.map((val, i) => ({x: val, y: knownY[i]}))
+                                    .filter(point => point.y !== null);
+            
+            if (validPoints.length < 2) return null;
+            
+            // Use least squares to fit a quadratic polynomial (ax² + bx + c)
+            const n = validPoints.length;
+            let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
+            let sumY = 0, sumXY = 0, sumX2Y = 0;
+            
+            for (const point of validPoints) {
+                const xi = point.x;
+                const yi = point.y;
+                
+                sumX += xi;
+                sumX2 += xi * xi;
+                sumX3 += xi * xi * xi;
+                sumX4 += xi * xi * xi * xi;
+                sumY += yi;
+                sumXY += xi * yi;
+                sumX2Y += xi * xi * yi;
+            }
+            
+            // Solve the system of equations for a, b, c
+            const matrix = [
+                [sumX4, sumX3, sumX2],
+                [sumX3, sumX2, sumX],
+                [sumX2, sumX, n]
+            ];
+            
+            const constants = [sumX2Y, sumXY, sumY];
+            
+            // Gaussian elimination to solve the system
+            for (let i = 0; i < 3; i++) {
+                // Make the diagonal 1
+                const diag = matrix[i][i];
+                for (let j = 0; j < 3; j++) matrix[i][j] /= diag;
+                constants[i] /= diag;
+                
+                // Eliminate other rows
+                for (let k = 0; k < 3; k++) {
+                    if (k !== i) {
+                        const factor = matrix[k][i];
+                        for (let j = 0; j < 3; j++) matrix[k][j] -= factor * matrix[i][j];
+                        constants[k] -= factor * constants[i];
+                    }
+                }
+            }
+            
+            const [a, b, c] = constants;
+            return a * x * x + b * x + c;
+        };
+
+        // Safeguard against negative values and handle nulls
+        const safeInterpolate = (x, knownX, knownY) => {
+            // First try polynomial interpolation
+            let result = polynomialInterpolation(x, knownX, knownY);
+            
+            // If polynomial fails (not enough points or null), fall back to linear
+            if (result === null) {
+                // Find the two closest points
+                let lowerIdx = -1;
+                let upperIdx = -1;
+                
+                for (let i = 0; i < knownX.length; i++) {
+                    if (knownY[i] === null) continue;
+                    if (knownX[i] <= x) lowerIdx = i;
+                    if (knownX[i] >= x && upperIdx === -1) upperIdx = i;
+                }
+                
+                // Handle edge cases
+                if (lowerIdx === -1 && upperIdx !== -1) {
+                    // Extrapolate below first point
+                    if (upperIdx + 1 < knownX.length && knownY[upperIdx + 1] !== null) {
+                        const x0 = knownX[upperIdx];
+                        const y0 = knownY[upperIdx];
+                        const x1 = knownX[upperIdx + 1];
+                        const y1 = knownY[upperIdx + 1];
+                        result = y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+                    } else {
+                        return knownY[upperIdx]; // Can't extrapolate, return nearest
+                    }
+                } else if (upperIdx === -1 && lowerIdx !== -1) {
+                    // Extrapolate above last point
+                    if (lowerIdx - 1 >= 0 && knownY[lowerIdx - 1] !== null) {
+                        const x0 = knownX[lowerIdx - 1];
+                        const y0 = knownY[lowerIdx - 1];
+                        const x1 = knownX[lowerIdx];
+                        const y1 = knownY[lowerIdx];
+                        result = y1 + (y1 - y0) * (x - x1) / (x1 - x0);
+                    } else {
+                        return knownY[lowerIdx]; // Can't extrapolate, return nearest
+                    }
+                } else if (lowerIdx !== -1 && upperIdx !== -1) {
+                    // Linear interpolation
+                    const x0 = knownX[lowerIdx];
+                    const y0 = knownY[lowerIdx];
+                    const x1 = knownX[upperIdx];
+                    const y1 = knownY[upperIdx];
+                    result = y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+                } else {
+                    return null; // No valid data points
+                }
+            }
+            
+            // Ensure result is not negative (for physical measurements)
+            if (result !== null && result < 0) {
+                // Find the minimum positive value in the dataset
+                const minPositive = Math.min(...knownY.filter(y => y !== null && y > 0));
+                result = minPositive * 0.9; // Return slightly less than minimum positive
+            }
+            
+            return result !== null ? Number(result.toFixed(2)) : null;
+        };
+
+        // Generate data for ages 1-30 months
+        const response = [];
+        for (let umur = 1; umur <= 30; umur++) {
+            let fase;
+            if (umur <= 12) fase = "TBM I";
+            else if (umur <= 24) fase = "TBM II";
+            else fase = "TBM III";
+
+            // Interpolate all parameters
+            const interpolatedData = {
+                umur,
+                fase,
+                tinggiTanaman: safeInterpolate(umur, x_values, selectedDataset[0]),
+                jumlahPelepah: safeInterpolate(umur, x_values, selectedDataset[1]),
+                panjangRachis: safeInterpolate(umur, x_values, selectedDataset[2]),
+                lebarPetiola: safeInterpolate(umur, x_values, selectedDataset[3]),
+                tebalPetiola: safeInterpolate(umur, x_values, selectedDataset[4]),
+                jumlahAnakDaun: safeInterpolate(umur, x_values, selectedDataset[5]),
+                panjangAnakDaun: safeInterpolate(umur, x_values, selectedDataset[6]),
+                lebarAnakDaun: safeInterpolate(umur, x_values, selectedDataset[7]),
+                lingkarBatang: safeInterpolate(umur, x_values, selectedDataset[8])
+            };
+
+            response.push(interpolatedData);
+        }
+
+        return res.json(response);
+    } catch (error) {
+        console.error("Error in getRulesOfStandarisasiVegetatif:", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
 
 export const callProcVegetatif = async (req, res) => {
     try {
