@@ -99,7 +99,7 @@ export const getAllPiCaCursor = async (req, res) => {
       });
     }
 
-    if (isNaN(parsedLimit) || parsedLimit <= 0 || parsedLimit > 100) {
+    if (isNaN(parsedLimit) || parsedLimit <= 0 || parsedLimit > 100000) {
       return res.status(400).json({
         message: "Invalid limit parameter. It must be a number between 1 and 100.",
       });
@@ -283,6 +283,180 @@ export const getAllPiCaCursor = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
+  try {
+    // Get parameters from query
+    const { 
+      page = 1, 
+      limit = 10, 
+      search = "", 
+      sortBy = "max_progress_percentage", 
+      sortOrder = "DESC",
+      regional = "",
+      kebun = ""
+    } = req.query;
+    
+    const parsedPage = Number.parseInt(page);
+    const parsedLimit = Number.parseInt(limit);
+
+    // Validate parameters
+    if (isNaN(parsedPage) || parsedPage <= 0) {
+      return res.status(400).json({
+        message: "Invalid page parameter. It must be a positive number.",
+      });
+    }
+
+    if (isNaN(parsedLimit) || parsedLimit <= 0 || parsedLimit > 100000) {
+      return res.status(400).json({
+        message: "Invalid limit parameter. It must be a number between 1 and 100.",
+      });
+    }
+
+    // Calculate offset
+    const offset = (parsedPage - 1) * parsedLimit;
+
+    // Build the count query to get total rows
+    let countQuery = "SELECT COUNT(*) as total FROM vw_final_pica";
+    const countReplacements = {};
+    const countWhereClauses = ["(corrective_actions IS NULL OR corrective_actions = '[]')"];
+
+    if (search) {
+      countWhereClauses.push(`(
+        regional LIKE :search 
+        OR kebun LIKE :search 
+        OR afdeling LIKE :search 
+        OR blok LIKE :search 
+        OR keterangan LIKE :search
+        OR why1 LIKE :search
+        OR why2 LIKE :search
+        OR why3 LIKE :search
+      )`);
+      countReplacements.search = `%${search}%`;
+    }
+
+    if (regional) {
+      countWhereClauses.push("regional = :regional");
+      countReplacements.regional = regional;
+    }
+
+    if (kebun) {
+      countWhereClauses.push("kebun = :kebun");
+      countReplacements.kebun = kebun;
+    }
+
+    countQuery += " WHERE " + countWhereClauses.join(" AND ");
+
+    // Execute count query
+    const countResult = await db_immature.query(countQuery, {
+      replacements: countReplacements,
+      type: db_immature.QueryTypes.SELECT,
+    });
+
+    const totalRows = countResult[0].total;
+
+    // QUERY 1: Ambil data tanpa corrective_actions untuk sorting
+    let dataQuery = `
+      SELECT 
+        id, regional, kebun, afdeling, tahun_tanam, pica_vegetatif_id,
+        why1, why2, why3, blok, value_pi, keterangan,
+        created_by, updated_by, bulan, tahun, createdAt, updatedAt,
+        project_id, max_progress_percentage,
+        vegetatif_id, vegetatif_regional, vegetatif_kebun, vegetatif_afdeling,
+        vegetatif_bulan_tanam, vegetatif_blok, vegetatif_tahun_tanam,
+        vegetatif_varietas, vegetatif_luas_ha, vegetatif_jumlah_pokok_awal_tanam,
+        vegetatif_jumlah_pokok_sekarang, vegetatif_umur_saat_ini_bulan,
+        vegetatif_jumlah_anak_daun, vegetatif_tinggi_tanaman_cm,
+        vegetatif_jumlah_pelepah_bh, vegetatif_panjang_rachis_cm,
+        vegetatif_lebar_petiola_cm, vegetatif_tebal_petiola_cm,
+        vegetatif_rerata_panjang_anak_daun, vegetatif_rerata_lebar_anak_daun,
+        vegetatif_lingkar_batang_cm, vegetatif_tahun, vegetatif_bulan,
+        vegetatif_status, vegetatif_approval, vegetatif_cal_jumlah_pelepah,
+        vegetatif_cal_lingkar_batang, vegetatif_cal_tinggi_tanaman,
+        vegetatif_vw_fase_tbm
+      FROM vw_final_pica
+      WHERE (corrective_actions IS NULL OR corrective_actions = '[]')
+    `;
+    
+    const dataReplacements = {
+      limit: parsedLimit,
+      offset: offset,
+    };
+
+    const dataWhereClauses = [];
+
+    if (search) {
+      dataWhereClauses.push(`(
+        regional LIKE :search 
+        OR kebun LIKE :search 
+        OR afdeling LIKE :search 
+        OR blok LIKE :search 
+        OR keterangan LIKE :search
+        OR why1 LIKE :search
+        OR why2 LIKE :search
+        OR why3 LIKE :search
+      )`);
+      dataReplacements.search = `%${search}%`;
+    }
+
+    if (regional) {
+      dataWhereClauses.push("regional = :regional");
+      dataReplacements.regional = regional;
+    }
+
+    if (kebun) {
+      dataWhereClauses.push("kebun = :kebun");
+      dataReplacements.kebun = kebun;
+    }
+
+    if (dataWhereClauses.length > 0) {
+      dataQuery += " AND " + dataWhereClauses.join(" AND ");
+    }
+
+    // Tambahkan sorting jika diperlukan
+    const validSortColumns = ['max_progress_percentage', 'regional', 'kebun', 'afdeling', 'blok', 'value_pi'];
+    const validSortOrder = ['ASC', 'DESC'];
+    
+    if (validSortColumns.includes(sortBy) && validSortOrder.includes(sortOrder.toUpperCase())) {
+      dataQuery += ` ORDER BY ${sortBy} ${sortOrder}`;
+    }
+
+    dataQuery += " LIMIT :limit OFFSET :offset";
+
+    // Execute data query
+    const piCaWithoutActions = await db_immature.query(dataQuery, {
+      replacements: dataReplacements,
+      type: db_immature.QueryTypes.SELECT,
+    });
+
+    // Since we're only selecting records without corrective_actions, we don't need the second query
+    const piCa = piCaWithoutActions.map(item => ({
+      ...item,
+      corrective_actions: null // or [] if you prefer
+    }));
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalRows / parsedLimit);
+
+    res.status(200).json({
+      data: piCa,
+      pagination: {
+        page: parsedPage,
+        limit: parsedLimit,
+        totalRows: totalRows,
+        totalPages: totalPages,
+        searchTerm: search || null,
+        filters: {
+          regional: regional || null,
+          kebun: kebun || null
+        }
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 export const picaw3Count = async (req, res) => {
     try {
