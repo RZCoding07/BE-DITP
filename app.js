@@ -56,8 +56,7 @@ const initializeDatabaseMaster = async () => {
 
 const initializeDatabaseImmature = async () => {
     try {
-        await db_immature.authenticate(); // Test connection\
-        // await WeeklyProgress.sync(); // Sync the model with the database
+        await db_immature.authenticate(); // Test connection
         console.log('Connection immature has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);

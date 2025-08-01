@@ -87,6 +87,70 @@ export const getSerapanBiayaByBulanTahun = async (req, res) => {
         });
     }
 };
+export const getSerapanBiayaByBulanTahunRegional = async (req, res) => {
+    try {
+        // Validate request body
+        if (!req.body || !req.body.bulan || !req.body.tahun) {
+            return res.status(400).json({ 
+                message: "Bad request - bulan and tahun are required in the request body" 
+            });
+        }
+
+        const bulan = req.body.bulan;
+        const tahun = req.body.tahun;
+
+        console.log(`Fetching data for bulan: ${bulan}, tahun: ${tahun}`);
+
+        // Validate bulan and tahun values
+        if (isNaN(bulan) || isNaN(tahun)) {
+            return res.status(400).json({ 
+                message: "bulan and tahun must be numeric values" 
+            });
+        }
+
+        // Prepare replacements object
+        const replacements = { 
+            bulan: parseInt(bulan), 
+            tahun: parseInt(tahun) 
+        };
+
+        console.log('Replacements:', replacements);
+
+        // Execute query
+        const serapanBiaya = await db_immature.query(`
+            SELECT * from vw_serapan_biaya_region
+            where bulan = :bulan AND tahun = :tahun
+        `, {
+            replacements: replacements,
+            type: db_immature.QueryTypes.SELECT
+        });
+
+        console.log(`Found ${serapanBiaya.length} records`);
+
+
+
+        // Return successful response
+        res.status(200).json({
+            success: true,
+            message: `Data retrieved successfully for bulan ${bulan} tahun ${tahun}`,
+            data: serapanBiaya,
+            metadata: {
+                count: serapanBiaya.length,
+                bulan: bulan,
+                tahun: tahun
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in getSerapanBiayaByBulanTahun:', error);
+        res.status(500).json({ 
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+};
 
 export const getSerapanBiayaByBulanTahunTbm = async (req, res) => {
     try {

@@ -37,7 +37,8 @@ import {
   updateSerapanBiaya,
   deleteSerapanBiaya,
   getDistinctTahunBulanSerapanBiaya,
-  getSerapanBiayaByBulanTahun
+  getSerapanBiayaByBulanTahun,
+  getSerapanBiayaByBulanTahunRegional
 } from '../controllers/immature/SerapanBiaya.js';
 
 import { createPi, deletePiById, getAllWhy, getPiById, updatePiById } from "../controllers/immature/Why.js";
@@ -98,6 +99,7 @@ routerImmature.put('/serapan-biaya/:id', updateSerapanBiaya);
 routerImmature.delete('/serapan-biaya/:id', deleteSerapanBiaya);
 
 routerImmature.post('/serapan-biaya-bulan-tahun', getSerapanBiayaByBulanTahun);
+routerImmature.post('/serapan-biaya-bulan-tahun-regional', getSerapanBiayaByBulanTahunRegional);
 
 routerImmature.get('/serapan-biaya-distinct-year', getDistinctTahunBulanSerapanBiaya);
 
