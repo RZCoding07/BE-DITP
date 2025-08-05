@@ -66,16 +66,6 @@ export const submitPiCa = async (req, res) => {
     }
 };
 
-export const getAllPiCa = async (req, res) => {
-    try {
-        const piCa = await db_immature.query('SELECT * FROM vw_pica', { type: db_immature.QueryTypes.SELECT });
-        res.status(200).json(piCa);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
-
-
 export const getAllPiCaCursor = async (req, res) => {
   try {
     // Get parameters from query
@@ -457,6 +447,40 @@ export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
   }
 };
 
+export const getDetailPicaWhereVegetatifId = async (req, res) => {
+    try {
+        const { vegetatif_id } = req.body;
+        if (!vegetatif_id) {
+            return res.status(400).json({
+                success: false,
+                message: "vegetatif_id is required"
+            });
+        }
+      // vw_final_res_pica is the view that contains the final PICA data
+        const query = `SELECT * FROM vw_final_res_pica WHERE vegetatif_id = :vegetatif_id`;
+        const result = await db_immature.query(query, {
+            replacements: { vegetatif_id },
+            type: db_immature.QueryTypes.SELECT
+        });
+        if (!result || result.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No data found for the given vegetatif_id"
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        console.error("Error fetching PICA data by vegetatif_id:", error);
+        return res.status(500).json({
+            success: false,
+            error: error.message || "Internal server error",
+        });
+    }
+};
+
 
 export const picaw3Count = async (req, res) => {
     try {
@@ -563,5 +587,7 @@ export const getVwFinalPica = async (req, res) => {
         });
     }
 };
+
+
 
 

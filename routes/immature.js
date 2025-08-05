@@ -43,7 +43,7 @@ import {
 
 import { createPi, deletePiById, getAllWhy, getPiById, updatePiById } from "../controllers/immature/Why.js";
 import { createCa, getAllCa } from "../controllers/immature/CorrectiveAction.js";
-import { getAllPiCaCursor, getAllPiCaWithoutCorrectiveActions, getVwFinalPica, picaw3Count, submitPiCa } from "../controllers/immature/PICA.js";
+import { getAllPiCaCursor, getAllPiCaWithoutCorrectiveActions, getDetailPicaWhereVegetatifId, getVwFinalPica, picaw3Count, submitPiCa } from "../controllers/immature/PICA.js";
 import { getAllAreal, getAllArealTbm, getAllArealTbmMaster, getAllKebunVegetatifAreal, getAllKebunVegetatifArealTbm, vwCalculateAreal } from "../controllers/immature/ArealStatement.js";
 import { getProgress, saveProgress } from "../controllers/immature/ProgressMingguanPICA.js";
 
@@ -216,6 +216,7 @@ routerImmature.get('/interpolate-dataset', getRulesOfStandarisasiVegetatifDatase
 
 routerImmature.get('/pica-all', getAllPiCaCursor);
 routerImmature.get('/pica-no-ca', getAllPiCaWithoutCorrectiveActions);
+routerImmature.post('/get-final-detail-pica', getDetailPicaWhereVegetatifId);
 
 routerImmature.get('/', getRulesOfStandarisasiVegetatif);
 

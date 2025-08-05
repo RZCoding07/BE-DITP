@@ -460,12 +460,62 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
 export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
     try {
         const x_values = [6, 12, 18, 24, 30]; // Data umur asli
-        const datasets = [
-            [ [29.7, 69.7, 96.7, 134.2, 167.0], [20.7, 36.8, 40.0, 39.6, 56.0], [130.4, 218.9, 280.8, 319.8, 463.9], [2.3, 4.0, 4.1, 4.5, 5.3], [1.6, 2.9, 2.4, 2.7, 3.4], [56.7, 78.8, 102.0, 123.1, 124.0], [32.1, 56.5, 66.3, 72.7, 86.2], [3.0, 3.7, 3.5, 4.0, 4.5], [116.51, 150.0, 192.5, 235.0, 277.50] ],
-            [ [32.0, 64.0, 98.9, 133.2, 173.0], [18.9, 36.1, 39.7, 37.6, 52.0], [155.6, 220.5, 282.9, 342.9, 486.9], [2.5, 3.3, 4.2, 4.4, 5.1], [1.7, 2.3, 2.5, 2.5, 3.3], [55.0, 77.2, 96.0, 109.5, 119.0], [37.7, 54.9, 63.7, 76.5, 80.9], [3.4, 3.5, 3.8, 4.1, 4.5], [116.51, 150.0, 192.5, 235.0, 277.50] ],
-            [ [36.1, 65.9, 95.4, 134.5, 164.0], [23.3, 34.6, 40.2, 40.5, 52.0], [142.1, 208.3, 280.8, 337.0, 456.1], [2.3, 3.4, 4.2, 4.3, 5.0], [1.4, 2.4, 2.6, 3.1, 2.9], [60.2, 73.9, 96.4, 119.4, 123.0], [3.9, 55.0, 69.5, 74.2, 82.1], [2.8, 3.3, 3.6, 4.1, 4.1], [116.51, 150.0, 192.5, 235.0, 277.50] ],
-            [ [36.1, 65.9, 95.4, 134.5, 164.0], [23.3, 34.6, 40.2, 40.5, 52.0], [148, 182.5, null, 252.5, 289.5], [2.3, 3.4, 4.2, 4.3, 5.0], [1.4, 2.4, 2.6, 3.1, 2.9], [60.2, 73.9, 96.4, 119.4, 123.0], [3.9, 55.0, 69.5, 74.2, 82.1], [2.8, 3.3, 3.6, 4.1, 4.3], [116.51, 150.0, 192.5, 235.0, 277.50] ],
-            [ [29.7, 69.7, 96.7, 134.2, 167.0], [20.7, 36.8, 40.0, 39.6, 56.0], [140, 190, 240, 285, 340], [2.3, 4.0, 4.1, 4.5, 5.3], [1.6, 2.9, 2.4, 2.7, 3.4], [56.7, 78.8, 102.0, 123.1, 124.0], [32.1, 56.5, 66.3, 72.7, 86.2], [3.0, 3.7, 3.5, 4.0, 4.5], [116.51, 150.0, 192.5, 235.0, 277.50] ]
+     const datasets = [
+            [
+                [29.7, 69.7, 96.7, 134.2, 167.0],
+                [20.7, 36.8, 40.0, 39.6, 56.0],
+                [130.4, 218.9, 280.8, 319.8, 463.9],
+                [2.3, 4.0, 4.1, 4.5, 5.3],
+                [1.6, 2.9, 2.4, 2.7, 3.4],
+                [56.7, 78.8, 102.0, 123.1, 124.0],
+                [32.1, 56.5, 66.3, 72.7, 86.2],
+                [3.0, 3.7, 3.5, 4.0, 4.5],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ],
+            [
+                [32.0, 64.0, 98.9, 133.2, 173.0],
+                [18.9, 36.1, 39.7, 37.6, 52.0],
+                [155.6, 220.5, 282.9, 342.9, 486.9],
+                [2.5, 3.3, 4.2, 4.4, 5.1],
+                [1.7, 2.3, 2.5, 2.5, 3.3],
+                [55.0, 77.2, 96.0, 109.5, 119.0],
+                [37.7, 54.9, 63.7, 76.5, 80.9],
+                [3.4, 3.5, 3.8, 4.1, 4.5],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ],
+            [
+                [36.1, 65.9, 95.4, 134.5, 164.0],
+                [23.3, 34.6, 40.2, 40.5, 52.0],
+                [142.1, 208.3, 280.8, 337.0, 456.1],
+                [2.3, 3.4, 4.2, 4.3, 5.0],
+                [1.4, 2.4, 2.6, 3.1, 2.9],
+                [60.2, 73.9, 96.4, 119.4, 123.0],
+                [3.9, 55.0, 69.5, 74.2, 82.1],
+                [2.8, 3.3, 3.6, 4.1, 4.1],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ],
+            [
+                [36.1, 65.9, 95.4, 134.5, 164.0],
+                [23.3, 34.6, 40.2, 40.5, 52.0],
+                [148, 182.5, , 252.5, 289.5],
+                [2.3, 3.4, 4.2, 4.3, 5.0],
+                [1.4, 2.4, 2.6, 3.1, 2.9],
+                [60.2, 73.9, 96.4, 119.4, 123.0],
+                [3.9, 55.0, 69.5, 74.2, 82.1],
+                [2.8, 3.3, 3.6, 4.1, 4.3],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ],
+            [
+                [29.7, 69.7, 96.7, 134.2, 167.0],
+                [20.7, 36.8, 40.0, 39.6, 56.0],
+                [140, 190, 240, 285, 340],
+                [2.3, 4.0, 4.1, 4.5, 5.3],
+                [1.6, 2.9, 2.4, 2.7, 3.4],
+                [56.7, 78.8, 102.0, 123.1, 124.0],
+                [32.1, 56.5, 66.3, 72.7, 86.2],
+                [3.0, 3.7, 3.5, 4.0, 4.5],
+                [116.51, 150.0, 192.5, 235.0, 277.50]
+            ]
         ];
         const idx = parseInt(req.query.idx) || 1;
 
@@ -477,13 +527,11 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
 
         // Polynomial regression function (quadratic)
         const polynomialInterpolation = (x, knownX, knownY) => {
-            // Filter out null values
             const validPoints = knownX.map((val, i) => ({x: val, y: knownY[i]}))
                                     .filter(point => point.y !== null);
             
             if (validPoints.length < 2) return null;
             
-            // Use least squares to fit a quadratic polynomial (ax² + bx + c)
             const n = validPoints.length;
             let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
             let sumY = 0, sumXY = 0, sumX2Y = 0;
@@ -501,7 +549,6 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                 sumX2Y += xi * xi * yi;
             }
             
-            // Solve the system of equations for a, b, c
             const matrix = [
                 [sumX4, sumX3, sumX2],
                 [sumX3, sumX2, sumX],
@@ -510,14 +557,11 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
             
             const constants = [sumX2Y, sumXY, sumY];
             
-            // Gaussian elimination to solve the system
             for (let i = 0; i < 3; i++) {
-                // Make the diagonal 1
                 const diag = matrix[i][i];
                 for (let j = 0; j < 3; j++) matrix[i][j] /= diag;
                 constants[i] /= diag;
                 
-                // Eliminate other rows
                 for (let k = 0; k < 3; k++) {
                     if (k !== i) {
                         const factor = matrix[k][i];
@@ -531,14 +575,10 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
             return a * x * x + b * x + c;
         };
 
-        // Safeguard against negative values and handle nulls
         const safeInterpolate = (x, knownX, knownY) => {
-            // First try polynomial interpolation
             let result = polynomialInterpolation(x, knownX, knownY);
             
-            // If polynomial fails (not enough points or null), fall back to linear
             if (result === null) {
-                // Find the two closest points
                 let lowerIdx = -1;
                 let upperIdx = -1;
                 
@@ -548,9 +588,7 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                     if (knownX[i] >= x && upperIdx === -1) upperIdx = i;
                 }
                 
-                // Handle edge cases
                 if (lowerIdx === -1 && upperIdx !== -1) {
-                    // Extrapolate below first point
                     if (upperIdx + 1 < knownX.length && knownY[upperIdx + 1] !== null) {
                         const x0 = knownX[upperIdx];
                         const y0 = knownY[upperIdx];
@@ -558,10 +596,9 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                         const y1 = knownY[upperIdx + 1];
                         result = y0 + (y1 - y0) * (x - x0) / (x1 - x0);
                     } else {
-                        return knownY[upperIdx]; // Can't extrapolate, return nearest
+                        return knownY[upperIdx];
                     }
                 } else if (upperIdx === -1 && lowerIdx !== -1) {
-                    // Extrapolate above last point
                     if (lowerIdx - 1 >= 0 && knownY[lowerIdx - 1] !== null) {
                         const x0 = knownX[lowerIdx - 1];
                         const y0 = knownY[lowerIdx - 1];
@@ -569,39 +606,38 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                         const y1 = knownY[lowerIdx];
                         result = y1 + (y1 - y0) * (x - x1) / (x1 - x0);
                     } else {
-                        return knownY[lowerIdx]; // Can't extrapolate, return nearest
+                        return knownY[lowerIdx];
                     }
                 } else if (lowerIdx !== -1 && upperIdx !== -1) {
-                    // Linear interpolation
                     const x0 = knownX[lowerIdx];
                     const y0 = knownY[lowerIdx];
                     const x1 = knownX[upperIdx];
                     const y1 = knownY[upperIdx];
                     result = y0 + (y1 - y0) * (x - x0) / (x1 - x0);
                 } else {
-                    return null; // No valid data points
+                    return null;
                 }
             }
             
-            // Ensure result is not negative (for physical measurements)
             if (result !== null && result < 0) {
-                // Find the minimum positive value in the dataset
-                const minPositive = Math.min(...knownY.filter(y => y !== null && y > 0));
-                result = minPositive * 0.9; // Return slightly less than minimum positive
+                const positives = knownY.filter(y => y !== null && y > 0);
+                if (positives.length > 0) {
+                    const minPositive = Math.min(...positives);
+                    result = minPositive * 0.9;
+                }
             }
             
             return result !== null ? Number(result.toFixed(2)) : null;
         };
 
-        // Generate data for ages 1-30 months
+        // Generate data for ages 1-36 months
         const response = [];
-        for (let umur = 1; umur <= 30; umur++) {
+        for (let umur = 1; umur <= 36; umur++) {
             let fase;
             if (umur <= 12) fase = "TBM I";
             else if (umur <= 24) fase = "TBM II";
             else fase = "TBM III";
 
-            // Interpolate all parameters
             const interpolatedData = {
                 umur,
                 fase,
