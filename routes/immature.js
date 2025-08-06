@@ -43,7 +43,7 @@ import {
 
 import { createPi, deletePiById, getAllWhy, getPiById, updatePiById } from "../controllers/immature/Why.js";
 import { createCa, getAllCa } from "../controllers/immature/CorrectiveAction.js";
-import { getAllPiCaCursor, getAllPiCaWithoutCorrectiveActions, getDetailPicaWhereVegetatifId, getVwFinalPica, picaw3Count, submitPiCa } from "../controllers/immature/PICA.js";
+import { deletePiCa, getAllPiCaCursor, getAllPiCaWithoutCorrectiveActions, getCaGraph, getDetailPicaWhereVegetatifId, getVwFinalPica, picaw3Count, submitPiCa } from "../controllers/immature/PICA.js";
 import { getAllAreal, getAllArealTbm, getAllArealTbmMaster, getAllKebunVegetatifAreal, getAllKebunVegetatifArealTbm, vwCalculateAreal } from "../controllers/immature/ArealStatement.js";
 import { getProgress, saveProgress } from "../controllers/immature/ProgressMingguanPICA.js";
 
@@ -207,15 +207,15 @@ routerImmature.post('/vegetatif/bulk', bulkDeleteVegetatif);
 routerImmature.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
 routerImmature.post('/vegetatif-distinct-month', getDistinctBulanVegetatif);
 routerImmature.get('/distinct-year-serapan-biaya', getDistinctTahunBulanSerapanBiaya);
-
 routerImmature.get('/vegetatif-bulan-tahun/:bulan/:tahun', getVegetatifByBulanTahun);
-
 
 routerImmature.get('/interpolate', getRulesOfStandarisasiVegetatif);
 routerImmature.get('/interpolate-dataset', getRulesOfStandarisasiVegetatifDataset);
 
 routerImmature.get('/pica-all', getAllPiCaCursor);
 routerImmature.get('/pica-no-ca', getAllPiCaWithoutCorrectiveActions);
+
+routerImmature.post('/delete-pica', deletePiCa);
 routerImmature.post('/get-final-detail-pica', getDetailPicaWhereVegetatifId);
 
 routerImmature.get('/', getRulesOfStandarisasiVegetatif);
@@ -223,6 +223,7 @@ routerImmature.get('/', getRulesOfStandarisasiVegetatif);
 routerImmature.post('/vegetatif-proc', callProcVegetatif);
 routerImmature.post('/vegetatif-final',  getVwFinalPica);
 
+routerImmature.post('/get-ca-graph', getCaGraph);
 
 routerImmature.post('/get-kebun-where-reg-vegetatif', getKebunWhereRegVegetatif);
 routerImmature.post('/get-afd-where-kebun-vegetatif', getAfdWhereKebunVegetatif);

@@ -1,84 +1,128 @@
-import PiCa from "../../models/immature/PiCaModel.js"
+import PiCa from "../../models/immature/PiCaModel.js";
 import { db_immature } from "../../config/Database.js";
 export const submitPiCa = async (req, res) => {
-    try {
-        const {
-            why1, why2, why3, value_pi, blok, vegetatif_id, correctiveActions, keterangan,
-            created_by, update_by, bulan, tahun,
-            regional, kebun, afdeling, tahun_tanam
-        } = req.body;
+  try {
+    const {
+      why1,
+      why2,
+      why3,
+      value_pi,
+      blok,
+      vegetatif_id,
+      correctiveActions,
+      keterangan,
+      created_by,
+      update_by,
+      bulan,
+      tahun,
+      regional,
+      kebun,
+      afdeling,
+      tahun_tanam,
+    } = req.body;
 
-        const piData = {
-            why1,
-            why2,
-            why3,
-            value_pi,
-            vegetatif_id,
-            blok,
-            keterangan,
-            bulan,
-            tahun,
-            corrective_actions: correctiveActions || [],
-            created_by: created_by || req.user?.fullname || "system",
-            updated_by: update_by || req.user?.fullname || "system",
-            regional: regional || "Unknown",
-            kebun: kebun || "Unknown",
-            afdeling: afdeling || "Unknown",
-            tahun_tanam: tahun_tanam || new Date().getFullYear().toString(),
-        };
+    const piData = {
+      why1,
+      why2,
+      why3,
+      value_pi,
+      vegetatif_id,
+      blok,
+      keterangan,
+      bulan,
+      tahun,
+      corrective_actions: correctiveActions || [],
+      created_by: created_by || req.user?.fullname || "system",
+      updated_by: update_by || req.user?.fullname || "system",
+      regional: regional || "Unknown",
+      kebun: kebun || "Unknown",
+      afdeling: afdeling || "Unknown",
+      tahun_tanam: tahun_tanam || new Date().getFullYear().toString(),
+    };
 
-        // Cek apakah data sudah ada berdasarkan unique key (misal: vegetatif_id + blok + bulan + tahun)
-        const existingRecord = await PiCa.findOne({
-            where: {
-                vegetatif_id,
-                blok,
-                bulan,
-                tahun,
-            }
-        });
+    // Cek apakah data sudah ada berdasarkan unique key (misal: vegetatif_id + blok + bulan + tahun)
+    // const existingRecord = await PiCa.findOne({
+    //     where: {
+    //         vegetatif_id,
+    //         blok,
+    //         bulan,
+    //         tahun,
+    //     }
+    // });
 
-        if (existingRecord) {
-            // Update data jika sudah ada
-            await existingRecord.update(piData);
+    // if (existingRecord) {
+    //     // Update data jika sudah ada
+    //     await existingRecord.update(piData);
 
-            return res.status(200).json({
-                success: true,
-                message: "Data updated successfully",
-                id: existingRecord.id,
-            });
-        } else {
-            // Create data baru kalau belum ada
-            const newRecord = await PiCa.create(piData);
+    //     return res.status(200).json({
+    //         success: true,
+    //         message: "Data updated successfully",
+    //         id: existingRecord.id,
+    //     });
+    // } else {
+    //     // Create data baru kalau belum ada
+    const newRecord = await PiCa.create(piData);
 
-            return res.status(201).json({
-                success: true,
-                message: "Data created successfully",
-                id: newRecord.id,
-            });
-        }
-
-    } catch (error) {
-        console.error("Error submitting PI and CA data:", error);
-        return res.status(500).json({
-            success: false,
-            error: error.message || "Internal server error",
-        });
-    }
+    return res.status(201).json({
+      success: true,
+      message: "Data created successfully",
+      id: newRecord.id,
+    });
+    // }
+  } catch (error) {
+    console.error("Error submitting PI and CA data:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Internal server error",
+    });
+  }
 };
+
+
+export const deletePiCa = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    // Cek apakah record ada
+    const existing = await PiCa.findOne({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: "Data tidak ditemukan",
+      });
+    }
+
+    // Hapus record
+    await PiCa.destroy({ where: { id } });
+
+    return res.status(200).json({
+      success: true,
+      message: "Data berhasil dihapus",
+    });
+  } catch (error) {
+    console.error("Error deleting PI and CA data:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Internal server error",
+    });
+  }
+};
+
+
 
 export const getAllPiCaCursor = async (req, res) => {
   try {
     // Get parameters from query
-    const { 
-      page = 1, 
-      limit = 10, 
-      search = "", 
-      sortBy = "max_progress_percentage", 
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "max_progress_percentage",
       sortOrder = "DESC",
       regional = "",
-      kebun = ""
+      kebun = "",
     } = req.query;
-    
+
     const parsedPage = Number.parseInt(page);
     const parsedLimit = Number.parseInt(limit);
 
@@ -91,7 +135,8 @@ export const getAllPiCaCursor = async (req, res) => {
 
     if (isNaN(parsedLimit) || parsedLimit <= 0 || parsedLimit > 100000) {
       return res.status(400).json({
-        message: "Invalid limit parameter. It must be a number between 1 and 100.",
+        message:
+          "Invalid limit parameter. It must be a number between 1 and 100.",
       });
     }
 
@@ -133,8 +178,8 @@ export const getAllPiCaCursor = async (req, res) => {
 
     // Execute count query
     const countResult = await db_immature.query(countQuery, {
-    replacements: countReplacements,
-    type: db_immature.QueryTypes.SELECT,
+      replacements: countReplacements,
+      type: db_immature.QueryTypes.SELECT,
     });
 
     const totalRows = countResult[0].total;
@@ -160,7 +205,7 @@ export const getAllPiCaCursor = async (req, res) => {
         vegetatif_vw_fase_tbm
       FROM vw_final_pica
     `;
-    
+
     const dataReplacements = {
       limit: parsedLimit,
       offset: offset,
@@ -197,10 +242,20 @@ export const getAllPiCaCursor = async (req, res) => {
     }
 
     // Tambahkan sorting jika diperlukan
-    const validSortColumns = ['max_progress_percentage', 'regional', 'kebun', 'afdeling', 'blok', 'value_pi'];
-    const validSortOrder = ['ASC', 'DESC'];
-    
-    if (validSortColumns.includes(sortBy) && validSortOrder.includes(sortOrder.toUpperCase())) {
+    const validSortColumns = [
+      "max_progress_percentage",
+      "regional",
+      "kebun",
+      "afdeling",
+      "blok",
+      "value_pi",
+    ];
+    const validSortOrder = ["ASC", "DESC"];
+
+    if (
+      validSortColumns.includes(sortBy) &&
+      validSortOrder.includes(sortOrder.toUpperCase())
+    ) {
       dataQuery += ` ORDER BY ${sortBy} ${sortOrder}`;
     }
 
@@ -214,25 +269,25 @@ export const getAllPiCaCursor = async (req, res) => {
 
     // QUERY 2: Ambil hanya corrective_actions untuk ID yang sudah difilter
     if (piCaWithoutActions.length > 0) {
-      const ids = piCaWithoutActions.map(item => item.id);
-      
+      const ids = piCaWithoutActions.map((item) => item.id);
+
       const actionsQuery = `
         SELECT id, corrective_actions 
         FROM vw_final_pica 
         WHERE id IN (:ids)
       `;
-      
+
       const actionsResult = await db_immature.query(actionsQuery, {
         replacements: { ids },
         type: db_immature.QueryTypes.SELECT,
       });
 
       // Gabungkan hasil kedua query
-      const piCa = piCaWithoutActions.map(item => {
-        const actionItem = actionsResult.find(a => a.id === item.id);
+      const piCa = piCaWithoutActions.map((item) => {
+        const actionItem = actionsResult.find((a) => a.id === item.id);
         return {
           ...item,
-          corrective_actions: actionItem ? actionItem.corrective_actions : null
+          corrective_actions: actionItem ? actionItem.corrective_actions : null,
         };
       });
 
@@ -249,8 +304,8 @@ export const getAllPiCaCursor = async (req, res) => {
           searchTerm: search || null,
           filters: {
             regional: regional || null,
-            kebun: kebun || null
-          }
+            kebun: kebun || null,
+          },
         },
       });
     } else {
@@ -264,8 +319,8 @@ export const getAllPiCaCursor = async (req, res) => {
           searchTerm: search || null,
           filters: {
             regional: regional || null,
-            kebun: kebun || null
-          }
+            kebun: kebun || null,
+          },
         },
       });
     }
@@ -274,19 +329,20 @@ export const getAllPiCaCursor = async (req, res) => {
   }
 };
 
+
 export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
   try {
     // Get parameters from query
-    const { 
-      page = 1, 
-      limit = 10, 
-      search = "", 
-      sortBy = "max_progress_percentage", 
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "max_progress_percentage",
       sortOrder = "DESC",
       regional = "",
-      kebun = ""
+      kebun = "",
     } = req.query;
-    
+
     const parsedPage = Number.parseInt(page);
     const parsedLimit = Number.parseInt(limit);
 
@@ -299,7 +355,8 @@ export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
 
     if (isNaN(parsedLimit) || parsedLimit <= 0 || parsedLimit > 100000) {
       return res.status(400).json({
-        message: "Invalid limit parameter. It must be a number between 1 and 100.",
+        message:
+          "Invalid limit parameter. It must be a number between 1 and 100.",
       });
     }
 
@@ -309,7 +366,9 @@ export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
     // Build the count query to get total rows
     let countQuery = "SELECT COUNT(*) as total FROM vw_final_pica";
     const countReplacements = {};
-    const countWhereClauses = ["(corrective_actions IS NULL OR corrective_actions = '[]')"];
+    const countWhereClauses = [
+      "(corrective_actions IS NULL OR corrective_actions = '[]')",
+    ];
 
     if (search) {
       countWhereClauses.push(`(
@@ -367,7 +426,7 @@ export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
       FROM vw_final_pica
       WHERE (corrective_actions IS NULL OR corrective_actions = '[]')
     `;
-    
+
     const dataReplacements = {
       limit: parsedLimit,
       offset: offset,
@@ -404,10 +463,20 @@ export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
     }
 
     // Tambahkan sorting jika diperlukan
-    const validSortColumns = ['max_progress_percentage', 'regional', 'kebun', 'afdeling', 'blok', 'value_pi'];
-    const validSortOrder = ['ASC', 'DESC'];
-    
-    if (validSortColumns.includes(sortBy) && validSortOrder.includes(sortOrder.toUpperCase())) {
+    const validSortColumns = [
+      "max_progress_percentage",
+      "regional",
+      "kebun",
+      "afdeling",
+      "blok",
+      "value_pi",
+    ];
+    const validSortOrder = ["ASC", "DESC"];
+
+    if (
+      validSortColumns.includes(sortBy) &&
+      validSortOrder.includes(sortOrder.toUpperCase())
+    ) {
       dataQuery += ` ORDER BY ${sortBy} ${sortOrder}`;
     }
 
@@ -420,9 +489,9 @@ export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
     });
 
     // Since we're only selecting records without corrective_actions, we don't need the second query
-    const piCa = piCaWithoutActions.map(item => ({
+    const piCa = piCaWithoutActions.map((item) => ({
       ...item,
-      corrective_actions: null // or [] if you prefer
+      corrective_actions: null, // or [] if you prefer
     }));
 
     // Calculate total pages
@@ -438,8 +507,8 @@ export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
         searchTerm: search || null,
         filters: {
           regional: regional || null,
-          kebun: kebun || null
-        }
+          kebun: kebun || null,
+        },
       },
     });
   } catch (error) {
@@ -447,105 +516,106 @@ export const getAllPiCaWithoutCorrectiveActions = async (req, res) => {
   }
 };
 
+
 export const getDetailPicaWhereVegetatifId = async (req, res) => {
-    try {
-        const { vegetatif_id } = req.body;
-        if (!vegetatif_id) {
-            return res.status(400).json({
-                success: false,
-                message: "vegetatif_id is required"
-            });
-        }
-      // vw_final_res_pica is the view that contains the final PICA data
-        const query = `SELECT * FROM vw_final_res_pica WHERE vegetatif_id = :vegetatif_id`;
-        const result = await db_immature.query(query, {
-            replacements: { vegetatif_id },
-            type: db_immature.QueryTypes.SELECT
-        });
-        if (!result || result.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "No data found for the given vegetatif_id"
-            });
-        }
-        return res.status(200).json({
-            success: true,
-            data: result
-        });
-    } catch (error) {
-        console.error("Error fetching PICA data by vegetatif_id:", error);
-        return res.status(500).json({
-            success: false,
-            error: error.message || "Internal server error",
-        });
+  try {
+    const { vegetatif_id } = req.body;
+    if (!vegetatif_id) {
+      return res.status(400).json({
+        success: false,
+        message: "vegetatif_id is required",
+      });
     }
+    // vw_final_res_pica is the view that contains the final PICA data
+    const query = `SELECT * FROM vw_final_res_pica WHERE vegetatif_id = :vegetatif_id`;
+    const result = await db_immature.query(query, {
+      replacements: { vegetatif_id },
+      type: db_immature.QueryTypes.SELECT,
+    });
+    if (!result || result.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No data found for the given vegetatif_id",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error fetching PICA data by vegetatif_id:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Internal server error",
+    });
+  }
 };
 
 
 export const picaw3Count = async (req, res) => {
-    try {
-        // Extract filter parameters from query string
-        const { regional, kebun, afdeling } = req.query;
-        
-        // Start building the query and parameters
-        let query = `
+  try {
+    // Extract filter parameters from query string
+    const { regional, kebun, afdeling } = req.query;
+
+    // Start building the query and parameters
+    let query = `
             SELECT 
                 why3, 
                 COUNT(*) AS count 
             FROM 
                 vw_pica 
         `;
-        
-        const whereClauses = [];
-        const replacements = {};
-        
-        // Add filters if they exist in the query parameters
-        if (regional) {
-            whereClauses.push('regional = :regional');
-            replacements.regional = regional;
-        }
-        
-        if (kebun) {
-            whereClauses.push('kebun = :kebun');
-            replacements.kebun = kebun;
-        }
-        
-        if (afdeling) {
-            whereClauses.push('afdeling = :afdeling');
-            replacements.afdeling = afdeling;
-        }
-        
-        // Add WHERE clause if there are any filters
-        if (whereClauses.length > 0) {
-            query += ' WHERE ' + whereClauses.join(' AND ');
-        }
-        
-        // Add GROUP BY clause
-        query += ' GROUP BY why3';
-        
-        // Execute the query with replacements
-        const result = await db_immature.query(query, {
-            replacements,
-            type: db_immature.QueryTypes.SELECT
-        });
-        
-        return res.status(200).json(result);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            error: error.message || "Internal server error",
-        });
+
+    const whereClauses = [];
+    const replacements = {};
+
+    // Add filters if they exist in the query parameters
+    if (regional) {
+      whereClauses.push("regional = :regional");
+      replacements.regional = regional;
     }
+
+    if (kebun) {
+      whereClauses.push("kebun = :kebun");
+      replacements.kebun = kebun;
+    }
+
+    if (afdeling) {
+      whereClauses.push("afdeling = :afdeling");
+      replacements.afdeling = afdeling;
+    }
+
+    // Add WHERE clause if there are any filters
+    if (whereClauses.length > 0) {
+      query += " WHERE " + whereClauses.join(" AND ");
+    }
+
+    // Add GROUP BY clause
+    query += " GROUP BY why3";
+
+    // Execute the query with replacements
+    const result = await db_immature.query(query, {
+      replacements,
+      type: db_immature.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Internal server error",
+    });
+  }
 };
 
 
 export const getVwFinalPica = async (req, res) => {
-    try {
+  try {
     const { bulan, tahun } = req.body;
 
-        // Start building the query and parameters
-        let query = `
+    // Start building the query and parameters
+    let query = `
             SELECT 
                 pica_vegetatif_id,
                 why3
@@ -554,40 +624,62 @@ export const getVwFinalPica = async (req, res) => {
             WHERE 
                 bulan = :bulan AND 
                 tahun = :tahun
-        `;  
-        const replacements = { bulan, tahun };
-        // Add filters if they exist in the query parameters
-        if (!bulan || !tahun) {
-            return res.status(400).json({
-                success: false,
-                message: "Bulan and Tahun are required parameters"
-            });
-        }
-
-        // Execute the query with replacements
-        const result = await db_immature.query(query, {
-            replacements,
-            type: db_immature.QueryTypes.SELECT
-        });
-        // If no data is found, return a specific message
-        if (!result || result.length === 0) {
-            return res.status(200).json({
-                success: false,
-                message: "No data found"
-            });
-        }
-        // Return the result
-        return res.status(200).json(result);
-
-    } catch (error) {
-        console.error("Error fetching final PICA data:", error);
-        return res.status(500).json({
-            success: false,
-            error: error.message || "Internal server error",
-        });
+        `;
+    const replacements = { bulan, tahun };
+    // Add filters if they exist in the query parameters
+    if (!bulan || !tahun) {
+      return res.status(400).json({
+        success: false,
+        message: "Bulan and Tahun are required parameters",
+      });
     }
+
+    // Execute the query with replacements
+    const result = await db_immature.query(query, {
+      replacements,
+      type: db_immature.QueryTypes.SELECT,
+    });
+    // If no data is found, return a specific message
+    if (!result || result.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "No data found",
+      });
+    }
+    // Return the result
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching final PICA data:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Internal server error",
+    });
+  }
 };
 
 
+export const  getCaGraph = async (req, res) => {
+  // vw_ca_graph 
+  try {
+    const result = await db_immature.query(`
+      SELECT * FROM vw_ca_graph WHERE bulan = :bulan AND tahun = :tahun
+    `, {
+      type: db_immature.QueryTypes.SELECT
+      , replacements: {
+        bulan: req.body.bulan,
+        tahun: req.body.tahun
+      }
+    });
 
-
+    return res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error("Error fetching CA graph data:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Internal server error"
+    });
+  }
+};
