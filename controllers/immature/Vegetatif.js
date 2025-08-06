@@ -300,7 +300,7 @@ export const getRulesOfStandarisasiVegetatif = async (req, res) => {
             [
                 [36.1, 65.9, 95.4, 134.5, 164.0],
                 [23.3, 34.6, 40.2, 40.5, 52.0],
-                [148, 182.5, , 252.5, 289.5],
+                [148, 182.5, 223, 252.5, 289.5],
                 [2.3, 3.4, 4.2, 4.3, 5.0],
                 [1.4, 2.4, 2.6, 3.1, 2.9],
                 [60.2, 73.9, 96.4, 119.4, 123.0],
@@ -497,7 +497,7 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
             [
                 [36.1, 65.9, 95.4, 134.5, 164.0],
                 [23.3, 34.6, 40.2, 40.5, 52.0],
-                [148, 182.5, , 252.5, 289.5],
+                [148, 182.5, 223, 252.5, 289.5],
                 [2.3, 3.4, 4.2, 4.3, 5.0],
                 [1.4, 2.4, 2.6, 3.1, 2.9],
                 [60.2, 73.9, 96.4, 119.4, 123.0],
@@ -517,7 +517,8 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                 [116.51, 150.0, 192.5, 235.0, 277.50]
             ]
         ];
-        const idx = parseInt(req.query.idx) || 1;
+
+              const idx = parseInt(req.query.idx) || 1;
 
         if (idx < 1 || idx > datasets.length) {
             return res.status(400).json({ error: "Invalid dataset index" });
@@ -525,21 +526,20 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
 
         const selectedDataset = datasets[idx - 1];
 
-        // Polynomial regression function (quadratic)
         const polynomialInterpolation = (x, knownX, knownY) => {
-            const validPoints = knownX.map((val, i) => ({x: val, y: knownY[i]}))
-                                    .filter(point => point.y !== null);
-            
+            const validPoints = knownX.map((val, i) => ({ x: val, y: knownY[i] }))
+                .filter(point => point.y !== null);
+
             if (validPoints.length < 2) return null;
-            
+
             const n = validPoints.length;
             let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
             let sumY = 0, sumXY = 0, sumX2Y = 0;
-            
+
             for (const point of validPoints) {
                 const xi = point.x;
                 const yi = point.y;
-                
+
                 sumX += xi;
                 sumX2 += xi * xi;
                 sumX3 += xi * xi * xi;
@@ -548,20 +548,20 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                 sumXY += xi * yi;
                 sumX2Y += xi * xi * yi;
             }
-            
+
             const matrix = [
                 [sumX4, sumX3, sumX2],
                 [sumX3, sumX2, sumX],
                 [sumX2, sumX, n]
             ];
-            
+
             const constants = [sumX2Y, sumXY, sumY];
-            
+
             for (let i = 0; i < 3; i++) {
                 const diag = matrix[i][i];
                 for (let j = 0; j < 3; j++) matrix[i][j] /= diag;
                 constants[i] /= diag;
-                
+
                 for (let k = 0; k < 3; k++) {
                     if (k !== i) {
                         const factor = matrix[k][i];
@@ -570,24 +570,24 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                     }
                 }
             }
-            
+
             const [a, b, c] = constants;
             return a * x * x + b * x + c;
         };
 
         const safeInterpolate = (x, knownX, knownY) => {
             let result = polynomialInterpolation(x, knownX, knownY);
-            
+
             if (result === null) {
                 let lowerIdx = -1;
                 let upperIdx = -1;
-                
+
                 for (let i = 0; i < knownX.length; i++) {
                     if (knownY[i] === null) continue;
                     if (knownX[i] <= x) lowerIdx = i;
                     if (knownX[i] >= x && upperIdx === -1) upperIdx = i;
                 }
-                
+
                 if (lowerIdx === -1 && upperIdx !== -1) {
                     if (upperIdx + 1 < knownX.length && knownY[upperIdx + 1] !== null) {
                         const x0 = knownX[upperIdx];
@@ -618,7 +618,7 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                     return null;
                 }
             }
-            
+
             if (result !== null && result < 0) {
                 const positives = knownY.filter(y => y !== null && y > 0);
                 if (positives.length > 0) {
@@ -626,33 +626,44 @@ export const getRulesOfStandarisasiVegetatifDataset = async (req, res) => {
                     result = minPositive * 0.9;
                 }
             }
-            
+
             return result !== null ? Number(result.toFixed(2)) : null;
         };
 
-        // Generate data for ages 1-36 months
         const response = [];
+
         for (let umur = 1; umur <= 36; umur++) {
             let fase;
             if (umur <= 12) fase = "TBM I";
             else if (umur <= 24) fase = "TBM II";
             else fase = "TBM III";
 
-            const interpolatedData = {
-                umur,
-                fase,
-                tinggiTanaman: safeInterpolate(umur, x_values, selectedDataset[0]),
-                jumlahPelepah: safeInterpolate(umur, x_values, selectedDataset[1]),
-                panjangRachis: safeInterpolate(umur, x_values, selectedDataset[2]),
-                lebarPetiola: safeInterpolate(umur, x_values, selectedDataset[3]),
-                tebalPetiola: safeInterpolate(umur, x_values, selectedDataset[4]),
-                jumlahAnakDaun: safeInterpolate(umur, x_values, selectedDataset[5]),
-                panjangAnakDaun: safeInterpolate(umur, x_values, selectedDataset[6]),
-                lebarAnakDaun: safeInterpolate(umur, x_values, selectedDataset[7]),
-                lingkarBatang: safeInterpolate(umur, x_values, selectedDataset[8])
-            };
+            const dataPoint = { umur, fase };
 
-            response.push(interpolatedData);
+            const labels = [
+                "tinggiTanaman",
+                "jumlahPelepah",
+                "panjangRachis",
+                "lebarPetiola",
+                "tebalPetiola",
+                "jumlahAnakDaun",
+                "panjangAnakDaun",
+                "lebarAnakDaun",
+                "lingkarBatang"
+            ];
+
+            for (let i = 0; i < labels.length; i++) {
+                const knownX = x_values;
+                const knownY = selectedDataset[i];
+
+                // Jika umur ada di data original, pakai langsung
+                const idxKnown = knownX.indexOf(umur);
+                const value = idxKnown !== -1 ? knownY[idxKnown] : safeInterpolate(umur, knownX, knownY);
+
+                dataPoint[labels[i]] = value;
+            }
+
+            response.push(dataPoint);
         }
 
         return res.json(response);
