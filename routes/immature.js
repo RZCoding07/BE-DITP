@@ -223,7 +223,7 @@ routerImmature.get('/', getRulesOfStandarisasiVegetatif);
 routerImmature.post('/vegetatif-proc', callProcVegetatif);
 routerImmature.post('/vegetatif-final',  getVwFinalPica);
 
-routerImmature.post('/get-ca-graph', getCaGraph);
+routerImmature.post('/graph-ca', getCaGraph);
 
 routerImmature.post('/get-kebun-where-reg-vegetatif', getKebunWhereRegVegetatif);
 routerImmature.post('/get-afd-where-kebun-vegetatif', getAfdWhereKebunVegetatif);
