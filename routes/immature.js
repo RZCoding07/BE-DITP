@@ -197,6 +197,7 @@ routerImmature.post('/ca/upload', upload.single('file'), async (req, res) => {
 });
 
 routerImmature.get('/luas-areal-statement', getAllAreal);
+
 routerImmature.post('/vegetatif', getAllVegetatif);
 routerImmature.post('/get-vw-vegetatif', getVwVegetatifById);
 routerImmature.get('/vegetatif/:id', getVegetatifById);
@@ -206,6 +207,7 @@ routerImmature.delete('/vegetatif/:id', deleteVegetatif);
 routerImmature.post('/vegetatif/bulk', bulkDeleteVegetatif);
 routerImmature.get('/vegetatif-distinct-year', getDistinctTahunBulanVegetatif);
 routerImmature.post('/vegetatif-distinct-month', getDistinctBulanVegetatif);
+
 routerImmature.get('/distinct-year-serapan-biaya', getDistinctTahunBulanSerapanBiaya);
 routerImmature.get('/vegetatif-bulan-tahun/:bulan/:tahun', getVegetatifByBulanTahun);
 
